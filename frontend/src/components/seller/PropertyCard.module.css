@@ -1,0 +1,118 @@
+.propertyCard {
+	background: var(--color-white);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-md);
+	overflow: hidden;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .propertyCard:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lg);
+  }
+  
+  .propertyCardImageContainer {
+	position: relative;
+	aspect-ratio: 16 / 10;
+	overflow: hidden;
+  }
+  
+  .propertyCardImage {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+  }
+  
+  .propertyCardBadge {
+	position: absolute;
+	top: var(--spacing-3);
+	right: var(--spacing-3);
+	background: var(--color-white);
+	padding: var(--spacing-1) var(--spacing-3);
+	border-radius: var(--radius-md);
+	font-size: var(--font-size-sm);
+	font-weight: 500;
+	text-transform: capitalize;
+  }
+  
+  .propertyCardContent {
+	padding: var(--spacing-5);
+  }
+  
+  .propertyCardHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: var(--spacing-3);
+  }
+  
+  .propertyCardTitle {
+	font-size: var(--font-size-lg);
+	font-weight: 600;
+	color: var(--color-gray-900);
+	margin: 0;
+	flex: 1;
+	margin-right: var(--spacing-3);
+  }
+  
+  .propertyCardPrice {
+	font-size: var(--font-size-xl);
+	font-weight: 700;
+	color: var(--color-primary);
+	white-space: nowrap;
+  }
+  
+  .propertyCardAddress {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-2);
+	margin: 0 0 var(--spacing-3) 0;
+	color: var(--color-gray-600);
+	font-size: var(--font-size-sm);
+  }
+  
+  .propertyCardMeta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: var(--spacing-4);
+	font-size: var(--font-size-sm);
+  }
+  
+  .propertyCardDate {
+	color: var(--color-gray-500);
+  }
+  
+  .propertyCardStatus {
+	font-weight: 500;
+  }
+  
+  .propertyCardStatusActive {
+	color: var(--color-success);
+  }
+  
+  .propertyCardActions {
+	display: flex;
+	gap: var(--spacing-2);
+  }
+  
+  @media (max-width: 768px) {
+	.propertyCardActions {
+	  flex-wrap: wrap;
+	}
+	
+	.propertyCardActions .btn--small {
+	  flex: 1;
+	  min-width: 0;
+	}
+	
+	.propertyCardHeader {
+	  flex-direction: column;
+	  align-items: flex-start;
+	  gap: var(--spacing-2);
+	}
+	
+	.propertyCardTitle {
+	  margin-right: 0;
+	}
+  }
