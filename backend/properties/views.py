@@ -57,7 +57,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             image_obj = PropertyImage.objects.create(property=property_obj, image=img)
             image_objs.append(image_obj)
         serializer = PropertyImageSerializer(image_objs, many=True, context={'request': request})
-        return Response({"status": "success", "data": serializer.data, "message": "Images uploaded", "errors": None, "pagination": None}, status=status.HTTP_201_CREATED)
+        return Response({"success": True, "data": serializer.data, "message": "Images uploaded", "errors": None, "pagination": None}, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def featured(self, request):
@@ -74,14 +74,14 @@ class PropertyViewSet(viewsets.ModelViewSet):
         saved, created = SavedProperty.objects.get_or_create(user=request.user, property=property_obj)
         if not created:
             saved.delete()
-            return Response({"status": "success", "data": None, "message": "Property unsaved", "errors": None, "pagination": None})
-        return Response({"status": "success", "data": None, "message": "Property saved", "errors": None, "pagination": None})
+            return Response({"success": True, "data": None, "message": "Property unsaved", "errors": None, "pagination": None})
+        return Response({"success": True, "data": None, "message": "Property saved", "errors": None, "pagination": None})
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def saved(self, request):
         saved_props = SavedProperty.objects.filter(user=request.user)
         serializer = SavedPropertySerializer(saved_props, many=True, context={'request': request})
-        return Response({"status": "success", "data": serializer.data, "message": "Saved properties", "errors": None, "pagination": None})
+        return Response({"success": True, "data": serializer.data, "message": "Saved properties", "errors": None, "pagination": None})
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def filters(self, request):
@@ -92,7 +92,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
             "cities": list(Property.objects.values_list('city', flat=True).distinct()),
             "states": list(Property.objects.values_list('state', flat=True).distinct()),
         }
-        return Response({"status": "success", "data": data, "message": "Filter options", "errors": None, "pagination": None})
+        return Response({"success": True, "data": data, "message": "Filter options", "errors": None, "pagination": None})
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search(self, request):

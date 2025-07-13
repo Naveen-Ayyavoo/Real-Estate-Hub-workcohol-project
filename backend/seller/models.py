@@ -3,9 +3,17 @@ from common.models import CustomUser
 
 class SellerProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='seller_profile')
-    agency_name = models.CharField(max_length=255, blank=True, null=True)
-    license_number = models.CharField(max_length=100, blank=True, null=True)
-    # Add more seller-specific fields as needed
+    first_name = models.CharField(max_length=150, blank=True, null=True)
+    last_name = models.CharField(max_length=150, blank=True, null=True)
+    alternative_number = models.CharField(max_length=20, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    GENDER_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    ]
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
 
     def __str__(self):
-        return f"SellerProfile for {self.user.email}"
+        user_email = getattr(self.user, 'email', 'N/A')
+        return f"SellerProfile for {user_email}"

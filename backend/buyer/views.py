@@ -10,15 +10,21 @@ class BuyerProfileView(APIView):
     def get(self, request):
         profile, created = BuyerProfile.objects.get_or_create(user=request.user)
         serializer = BuyerProfileSerializer(profile)
-        return Response(serializer.data)
+        return Response({"success": True, "data": serializer.data, "message": "Buyer profile fetched", "errors": None, "pagination": None})
 
     def put(self, request):
         profile, created = BuyerProfile.objects.get_or_create(user=request.user)
-        serializer = BuyerProfileSerializer(profile, data=request.data, partial=True)
+        data = request.data.copy()
+        # Wrap user fields in 'user' key if not already present
+        user_fields = ['first_name', 'last_name', 'address', 'alternative_number', 'date_of_birth', 'gender']
+        user_data = {k: data[k] for k in user_fields if k in data}
+        if user_data:
+            data['user'] = user_data
+        serializer = BuyerProfileSerializer(profile, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+            return Response({"success": True, "data": serializer.data, "message": "Buyer profile updated", "errors": None, "pagination": None})
+        return Response({"success": False, "data": None, "message": "Validation error", "errors": serializer.errors, "pagination": None}, status=400)
 
 class BuyerDashboardView(APIView):
     permission_classes = [IsAuthenticated]

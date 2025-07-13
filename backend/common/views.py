@@ -17,11 +17,25 @@ class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self, request):
         data = request.data.copy()
-        if 'email' in data:
-            data['username'] = data['email']
         serializer = CustomUserSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             user = serializer.save()
+            # Create or update profile with first_name and last_name
+            user_type = data.get('user_type')
+            first_name = data.get('first_name', '')
+            last_name = data.get('last_name', '')
+            if user_type == 'buyer':
+                from buyer.models import BuyerProfile
+                profile, _ = BuyerProfile.objects.get_or_create(user=user)
+                profile.first_name = first_name
+                profile.last_name = last_name
+                profile.save()
+            elif user_type == 'seller':
+                from seller.models import SellerProfile
+                profile, _ = SellerProfile.objects.get_or_create(user=user)
+                profile.first_name = first_name
+                profile.last_name = last_name
+                profile.save()
             return Response({"status": "success", "data": CustomUserSerializer(user, context={'request': request}).data, "message": "Registration successful", "errors": None, "pagination": None}, status=status.HTTP_201_CREATED)
         return Response({"status": "error", "data": None, "message": "Registration failed", "errors": serializer.errors, "pagination": None}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -174,4 +188,4 @@ class PasswordResetConfirmView(APIView):
             token_obj.save()
             return Response({"success": True, "data": None, "message": "Password reset successful", "errors": None, "pagination": None})
         except PasswordResetToken.DoesNotExist:
-            return Response({"success": False, "data": None, "message": "Invalid or used token", "errors": None, "pagination": None}, status=400) 
+            return Response({"success": False, "data": None, "message": "Invalid or used token", "errors": None, "pagination": None}, status=400)

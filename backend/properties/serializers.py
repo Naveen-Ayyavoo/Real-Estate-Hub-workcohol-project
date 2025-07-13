@@ -41,13 +41,18 @@ class PropertySerializer(serializers.ModelSerializer):
     created_by = CustomUserSerializer(source='seller', read_only=True)
     main_image = serializers.SerializerMethodField()
     location = serializers.CharField(source='address')
+    beds = serializers.IntegerField(source='bedrooms')
+    baths = serializers.DecimalField(source='bathrooms', max_digits=3, decimal_places=1)
+    sqft = serializers.IntegerField(source='area')
+    negotiable = serializers.BooleanField()
+    features = serializers.JSONField()
 
     class Meta:
         model = Property
         fields = [
             'id', 'title', 'price', 'location', 'description', 'main_image', 'images',
-            'created_by', 'property_type', 'bedrooms', 'bathrooms', 'area', 'city', 'state', 'zip_code',
-            'latitude', 'longitude', 'status', 'featured', 'views_count', 'created_at', 'updated_at'
+            'created_by', 'property_type', 'beds', 'baths', 'sqft', 'city', 'state', 'zip_code',
+            'latitude', 'longitude', 'status', 'featured', 'views_count', 'negotiable', 'features', 'created_at', 'updated_at'
         ]
 
     def get_main_image(self, obj):
