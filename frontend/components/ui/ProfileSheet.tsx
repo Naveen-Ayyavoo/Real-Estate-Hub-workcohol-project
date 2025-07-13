@@ -1,5 +1,11 @@
 "use client";
-import React, { useEffect, useState, useRef, ChangeEvent, FormEvent } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+  FormEvent,
+} from "react";
 import {
   Sheet,
   SheetTrigger,
@@ -9,6 +15,7 @@ import {
   SheetClose,
 } from "./sheet";
 import { toast } from "sonner";
+import apiService from "@/lib/api";
 
 interface UserProfile {
   first_name: string;
@@ -28,81 +35,107 @@ interface ProfileSheetProps {
   trigger?: React.ReactNode;
 }
 
-const fetchProfile = async (userType: "buyer" | "seller"): Promise<UserProfile> => {
-  const token = localStorage.getItem("access_token");
-  if (!token) throw new Error("No authentication token found");
+const fetchProfile = async (
+  userType: "buyer" | "seller"
+): Promise<UserProfile> => {
+  try {
+    console.log("Fetching profile for userType:", userType);
 
-  const apiUrl = userType === "buyer" ? "/api/buyer/profile/" : "/api/seller/profile/";
+    const data =
+      userType === "buyer"
+        ? await apiService.getBuyerProfile()
+        : await apiService.getSellerProfile();
 
-  const response = await fetch(apiUrl, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
+    console.log("Raw API response:", data);
+    let profile = data.data || {};
 
-  if (!response.ok) throw new Error("Failed to fetch profile");
-
-  const data = await response.json();
-  let profile = data.data || {};
-
-  if (profile.user) profile = { ...profile, ...profile.user };
-
-  return {
-    first_name: profile.first_name || "",
-    last_name: profile.last_name || "",
-    phone: profile.phone || "",
-    address: profile.address || "",
-    alternative_number: profile.alternative_number || "",
-    date_of_birth: profile.date_of_birth || "",
-    gender: profile.gender || "",
-    profile_image: profile.profile_image || null,
-  };
+    // The serializer flattens user fields, so we don't need to merge user data
+    return {
+      first_name: profile.first_name || "",
+      last_name: profile.last_name || "",
+      phone: profile.phone || "",
+      address: profile.address || "",
+      alternative_number: profile.alternative_number || "",
+      date_of_birth: profile.date_of_birth || "",
+      gender: profile.gender || "",
+      profile_image: profile.profile_image || null,
+    };
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    throw error;
+  }
 };
 
 const updateProfile = async (
   userType: "buyer" | "seller",
   profileData: UserProfile
 ): Promise<UserProfile> => {
-  const token = localStorage.getItem("access_token");
-  if (!token) throw new Error("No authentication token found");
+  try {
+    console.log("Updating profile for userType:", userType);
 
-  const apiUrl = userType === "buyer" ? "/api/buyer/profile/" : "/api/seller/profile/";
+    // Create FormData for file upload
+    const formData = new FormData();
+    Object.entries(profileData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value instanceof File ? value : String(value));
+      }
+    });
 
-  const formData = new FormData();
-  Object.entries(profileData).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      formData.append(key, value instanceof File ? value : String(value));
+    // Use direct fetch for FormData since API service expects JSON
+    const token = apiService.getAuthToken();
+    if (!token) throw new Error("No authentication token found");
+
+    const apiUrl =
+      userType === "buyer"
+        ? "http://localhost:8000/api/buyer/profile/"
+        : "http://localhost:8000/api/seller/profile/";
+
+    const response = await fetch(apiUrl, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Update profile error response:", errorText);
+
+      // Let the API service handle authentication errors
+      if (response.status === 401) {
+        apiService.removeAuthToken();
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/login";
+        throw new Error("Authentication expired");
+      }
+
+      throw new Error("Failed to update profile");
     }
-  });
 
-  const response = await fetch(apiUrl, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData,
-  });
+    const data = await response.json();
+    let updated = data.data || {};
 
-  if (!response.ok) throw new Error("Failed to update profile");
-
-  const data = await response.json();
-  let updated = data.data || {};
-
-  if (updated.user) updated = { ...updated, ...updated.user };
-
-  return {
-    first_name: updated.first_name || "",
-    last_name: updated.last_name || "",
-    phone: updated.phone || "",
-    address: updated.address || "",
-    alternative_number: updated.alternative_number || "",
-    date_of_birth: updated.date_of_birth || "",
-    gender: updated.gender || "",
-    profile_image: updated.profile_image || null,
-  };
+    return {
+      first_name: updated.first_name || "",
+      last_name: updated.last_name || "",
+      phone: updated.phone || "",
+      address: updated.address || "",
+      alternative_number: updated.alternative_number || "",
+      date_of_birth: updated.date_of_birth || "",
+      gender: updated.gender || "",
+      profile_image: updated.profile_image || null,
+    };
+  } catch (error) {
+    console.error("Profile update error:", error);
+    throw error;
+  }
 };
 
-export default function ProfileSheet({ userType, open, onOpenChange, trigger }: ProfileSheetProps) {
+export default function ProfileSheet({
+  userType,
+  open,
+  onOpenChange,
+  trigger,
+}: ProfileSheetProps) {
   const [profile, setProfile] = useState<UserProfile>({
     first_name: "",
     last_name: "",
@@ -117,20 +150,44 @@ export default function ProfileSheet({ userType, open, onOpenChange, trigger }: 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || typeof window === "undefined") return;
+
+    // Check if we have a valid token before making the request
+    const token = apiService.getAuthToken();
+    if (!token) {
+      console.log("No authentication token found");
+      toast.error("Please login to view your profile");
+      onOpenChange(false);
+      window.location.href = "/login";
+      return;
+    }
+
     setLoading(true);
+    console.log("Fetching profile for userType:", userType);
+    console.log("Token exists:", !!token);
+
     fetchProfile(userType)
       .then((data) => {
+        console.log("Profile data received:", data);
         setProfile(data);
         if (typeof data.profile_image === "string") {
           setPreview(data.profile_image);
         }
       })
-      .catch((err) => toast.error(err.message))
+      .catch((err) => {
+        console.error("Profile fetch error:", err);
+        if (err.message === "Authentication expired") {
+          // Don't show error toast since we're already redirecting
+          return;
+        }
+        toast.error(err.message);
+      })
       .finally(() => setLoading(false));
-  }, [open, userType]);
+  }, [open, userType, onOpenChange]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
@@ -161,6 +218,19 @@ export default function ProfileSheet({ userType, open, onOpenChange, trigger }: 
     }
   };
 
+  const handleLogout = () => {
+    // Clear authentication data
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_type");
+    apiService.removeAuthToken();
+
+    // Show success message
+    toast.success("Logged out successfully");
+
+    // Redirect to home page
+    window.location.href = "/";
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       {trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>}
@@ -179,7 +249,11 @@ export default function ProfileSheet({ userType, open, onOpenChange, trigger }: 
             <div className="flex flex-col items-center mb-4">
               <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden mb-2">
                 {preview ? (
-                  <img src={preview} alt="Profile" className="object-cover w-full h-full" />
+                  <img
+                    src={preview}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
                 ) : (
                   <span className="text-gray-400 flex items-center justify-center h-full">
                     No Image
@@ -244,6 +318,15 @@ export default function ProfileSheet({ userType, open, onOpenChange, trigger }: 
               className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-medium disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Changes"}
+            </button>
+
+            {/* Logout Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 font-medium"
+            >
+              Logout
             </button>
           </form>
         )}

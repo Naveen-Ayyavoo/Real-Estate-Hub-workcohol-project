@@ -3,12 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Eye,
-  EyeOff,
-  User,
-  Building2,
-} from "lucide-react";
+import apiService from "@/lib/api";
+import { Eye as EyeIcon, EyeOff as EyeOffIcon } from "lucide-react";
 
 export default function RegisterPage() {
   const [accountType, setAccountType] = useState("buyer");
@@ -92,7 +88,19 @@ export default function RegisterPage() {
                 }`}
               >
                 <div className="flex items-center mb-2">
-                  <User className="w-5 h-5 text-blue-600 mr-2" />
+                  <svg
+                    className="w-5 h-5 text-blue-600 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
                   <span className="font-medium text-gray-900">
                     Buyer Account
                   </span>
@@ -112,7 +120,19 @@ export default function RegisterPage() {
                 }`}
               >
                 <div className="flex items-center mb-2">
-                  <Building2 className="w-5 h-5 text-blue-600 mr-2" />
+                  <svg
+                    className="w-5 h-5 text-blue-600 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
                   <span className="font-medium text-gray-900">
                     Seller Account
                   </span>
@@ -128,25 +148,46 @@ export default function RegisterPage() {
             className="space-y-4"
             onSubmit={async (e) => {
               e.preventDefault();
-              const response = await fetch(
-                "http://localhost:8000/api/auth/register/",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    email: formData.email,
-                    password: formData.password,
-                    confirm_password: formData.confirm_password,
-                    user_type: accountType,
-                  }),
+
+              // Validate passwords match
+              if (formData.password !== formData.confirm_password) {
+                alert("Passwords do not match!");
+                return;
+              }
+
+              // Validate password requirements
+              const isPasswordValid =
+                Object.values(passwordValidation).every(Boolean);
+              if (!isPasswordValid) {
+                alert("Please meet all password requirements!");
+                return;
+              }
+
+              try {
+                const data = await apiService.register({
+                  first_name: formData.firstName,
+                  last_name: formData.lastName,
+                  email: formData.email,
+                  password: formData.password,
+                  confirm_password: formData.confirm_password,
+                  user_type: accountType,
+                });
+
+                if (data.status === "success") {
+                  alert("Registration successful! Please login.");
+                  window.location.href = "/login";
+                } else {
+                  // Handle specific error messages
+                  let errorMessage = data.message || "Registration failed!";
+                  if (data.errors && data.errors.email) {
+                    errorMessage = data.errors.email;
+                  }
+                  alert(errorMessage);
                 }
-              );
-              const data = await response.json();
-              // Handle response (success, error, etc.)
+              } catch (error) {
+                console.error("Registration error:", error);
+                alert(error.message || "Registration failed!");
+              }
             }}
           >
             {/* Name Fields */}
@@ -216,9 +257,9 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <Eye className="h-5 w-5 text-gray-500" />
+                    <EyeOffIcon className="h-5 w-5 text-gray-500" />
                   ) : (
-                    <EyeOff className="h-5 w-5 text-gray-500" />
+                    <EyeIcon className="h-5 w-5 text-gray-500" />
                   )}
                 </button>
               </div>
@@ -303,9 +344,9 @@ export default function RegisterPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <Eye className="h-5 w-5 text-gray-500" />
+                    <EyeOffIcon className="h-5 w-5 text-gray-500" />
                   ) : (
-                    <EyeOff className="h-5 w-5 text-gray-500" />
+                    <EyeIcon className="h-5 w-5 text-gray-500" />
                   )}
                 </button>
               </div>

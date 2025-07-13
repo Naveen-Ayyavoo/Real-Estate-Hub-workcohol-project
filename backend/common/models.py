@@ -25,8 +25,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ]
     email = models.EmailField(unique=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPES, null=True, blank=True)
-    # phone = models.CharField(max_length=20, null=True, blank=True)
-    # profile_image = models.ImageField(upload_to='profiles/', null=True, blank=True)  # Removed
 
     first_name = models.CharField(max_length=150, blank=True, null=True)
     last_name = models.CharField(max_length=150, blank=True, null=True)

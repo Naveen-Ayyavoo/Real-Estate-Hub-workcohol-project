@@ -2,7 +2,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, EyeOff } from 'lucide-react';
+import apiService from "@/lib/api";
+import { checkServerStatus, showServerError } from "@/lib/serverCheck";
+import { Eye as EyeIcon, EyeOff as EyeOffIcon } from "lucide-react";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -18,22 +20,34 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     try {
-      const res = await fetch("http://localhost:8000/api/auth/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.status === "success") {
-        localStorage.setItem("access_token", data.data.access);
-        localStorage.setItem("refresh_token", data.data.refresh);
+      // Check if server is running first
+      const isServerRunning = await checkServerStatus();
+      if (!isServerRunning) {
+        showServerError();
+        setError(
+          "Django server is not running. Please start it and try again."
+        );
+        return;
+      }
+
+      const data = await apiService.login(formData.email, formData.password);
+
+      if (data.status === "success") {
+        // Store user type and access token for authentication
         const userType = data.data.user && data.data.user.user_type;
+        const accessToken = data.data.access;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user_type", userType);
+          localStorage.setItem("access_token", accessToken);
+          console.log("Login successful:", {
+            userType,
+            hasToken: !!accessToken,
+          });
+        }
+
+        // Redirect based on user type
         if (userType === "seller") {
           window.location.href = "/seller/dashboard";
         } else {
@@ -43,7 +57,8 @@ export default function LoginPage() {
         setError(data.message || "Login failed");
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      console.error("Login error:", err);
+      setError(err.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -122,9 +137,9 @@ export default function LoginPage() {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOffIcon className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <EyeIcon className="h-5 w-5" />
                   )}
                 </button>
               </div>

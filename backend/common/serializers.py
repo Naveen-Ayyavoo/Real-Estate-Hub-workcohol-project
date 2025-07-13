@@ -12,7 +12,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True},
             'confirm_password': {'write_only': True},
-            'email': {'read_only': True},
+            'email': {'required': True},
             'first_name': {'required': False},
             'last_name': {'required': False},
         }

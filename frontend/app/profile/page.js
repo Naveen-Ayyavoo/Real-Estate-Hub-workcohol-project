@@ -1,7 +1,8 @@
 "use client"
 import { useEffect, useState } from "react"
+import AuthGuard from "@/components/AuthGuard"
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -66,6 +67,7 @@ export default function ProfilePage() {
   if (error) return <div className="p-8 text-red-600">{error}</div>
 
   return (
+    <AuthGuard>
     <div className="max-w-xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">My Profile</h1>
       {success && <div className="mb-4 text-green-600">{success}</div>}
@@ -133,5 +135,8 @@ export default function ProfilePage() {
         </button>
       </form>
     </div>
+    </AuthGuard>
   )
 }
+
+export default ProfilePageContent;

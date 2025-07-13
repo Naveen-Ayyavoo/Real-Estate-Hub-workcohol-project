@@ -2,9 +2,29 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import ProfileSheet from "@/components/ui/ProfileSheet";
+import dynamic from "next/dynamic";
+import AuthGuard from "@/components/AuthGuard";
+import {
+  Home,
+  User,
+  Search,
+  Heart,
+  Calendar,
+  Menu,
+  Mail,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+} from "lucide-react";
 
-export default function BuyerDashboard() {
+// Dynamically import ProfileSheet to prevent hydration issues
+const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
+  ssr: false,
+  loading: () => <div>Loading...</div>,
+});
+
+function BuyerDashboardContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -69,12 +89,30 @@ export default function BuyerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <AuthGuard allowedUserType="buyer">
+      <div className="min-h-screen bg-gray-50 flex relative">
+      {/* Sidebar Toggle Button (when closed) */}
+      {!sidebarOpen && (
+        <button
+          className="fixed top-6 left-2 z-50 bg-white rounded-full shadow p-1 border border-gray-200 transition-all"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <Menu className="w-6 h-6 text-gray-700" />
+        </button>
+      )}
+      {/* Overlay when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
       {/* Sidebar */}
       <div
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+        } fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out flex flex-col`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <div className="flex items-center">
@@ -85,20 +123,13 @@ export default function BuyerDashboard() {
               RealEstate Hub
             </span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+          {/* Sidebar Close Button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="ml-2 bg-gray-100 rounded-full p-1 border border-gray-200"
+            aria-label="Close sidebar"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
         </div>
 
@@ -562,7 +593,7 @@ export default function BuyerDashboard() {
                   <div className="flex items-end space-x-2 pb-4">
                     {["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(
                       (month, index) => (
-                      <div key={month} className="text-center">
+                        <div key={month} className="text-center">
                           <div
                             className="w-4 bg-blue-600 rounded-t"
                             style={{ height: `${20 + index * 8}px` }}
@@ -570,7 +601,7 @@ export default function BuyerDashboard() {
                           <span className="text-xs text-gray-600 mt-1 block">
                             {month}
                           </span>
-                      </div>
+                        </div>
                       )
                     )}
                   </div>
@@ -587,5 +618,8 @@ export default function BuyerDashboard() {
         onOpenChange={setProfileOpen}
       />
     </div>
+    </AuthGuard>
   );
 }
+
+export default BuyerDashboardContent;

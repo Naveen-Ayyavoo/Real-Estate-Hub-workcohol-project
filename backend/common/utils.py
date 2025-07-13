@@ -15,7 +15,11 @@ def custom_exception_handler(exc, context):
         if response.status_code == status.HTTP_400_BAD_REQUEST:
             data["message"] = "Validation error"
         elif response.status_code == status.HTTP_401_UNAUTHORIZED:
-            data["message"] = "Authentication error"
+            # Check if there's already a specific message in the response
+            if hasattr(response, 'data') and isinstance(response.data, dict) and response.data.get('message'):
+                data["message"] = response.data['message']
+            else:
+                data["message"] = "Authentication error"
         elif response.status_code == status.HTTP_403_FORBIDDEN:
             data["message"] = "Permission denied"
         elif response.status_code == status.HTTP_404_NOT_FOUND:

@@ -7,7 +7,7 @@ class SellerProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SellerProfile
-        fields = ['id', 'user', 'alternative_number', 'date_of_birth', 'gender']
+        fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'address', 'image', 'alternative_number', 'date_of_birth', 'gender']
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})

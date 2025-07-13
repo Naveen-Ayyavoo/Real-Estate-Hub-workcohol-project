@@ -16,7 +16,7 @@ class BuyerProfileView(APIView):
         profile, created = BuyerProfile.objects.get_or_create(user=request.user)
         data = request.data.copy()
         # Wrap user fields in 'user' key if not already present
-        user_fields = ['first_name', 'last_name', 'address', 'alternative_number', 'date_of_birth', 'gender']
+        user_fields = ['first_name', 'last_name', 'phone', 'address', 'alternative_number', 'date_of_birth', 'gender']
         user_data = {k: data[k] for k in user_fields if k in data}
         if user_data:
             data['user'] = user_data
