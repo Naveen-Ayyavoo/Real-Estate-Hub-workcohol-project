@@ -3,6 +3,6 @@ from .views import BuyerProfileView
 from .views import BuyerDashboardView
 
 urlpatterns = [
-    path('profile/', BuyerProfileView.as_view(), name='buyer-profile'),
+    path('buyer/profile/', BuyerProfileView.as_view(), name='buyer-profile'),
     path('dashboard/buyer/', BuyerDashboardView.as_view(), name='buyer-dashboard'),
 ]

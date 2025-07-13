@@ -155,6 +155,10 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
+LOGIN_URL = None
+
+APPEND_SLASH = False
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

@@ -73,6 +73,31 @@ class PropertyAPITest(APITestCase):
         resp = self.client.post(url, data)
         self.assertEqual(resp.status_code, 201)
 
+    def test_property_create_with_features_negotiable(self):
+        self.authenticate(self.seller)
+        url = reverse('property-list')
+        data = {
+            'title': 'Feature Test',
+            'description': 'With features',
+            'price': 123456,
+            'property_type': 'house',
+            'beds': 4,
+            'baths': 2.5,
+            'sqft': 2000,
+            'address': '789 New St',
+            'city': 'Testville',
+            'state': 'TS',
+            'zip_code': '99999',
+            'negotiable': True,
+            'features': {"swimmingPool": True, "gym": False}
+        }
+        resp = self.client.post(url, data, format='json')
+        self.assertEqual(resp.status_code, 201)
+        self.assertTrue(resp.data['id'])
+        self.assertEqual(resp.data['negotiable'], True)
+        self.assertIn('features', resp.data)
+        self.assertEqual(resp.data['features']['swimmingPool'], True)
+
     def test_property_image_upload(self):
         self.authenticate(self.seller)
         url = reverse('property-upload-images', args=[self.property.id])
