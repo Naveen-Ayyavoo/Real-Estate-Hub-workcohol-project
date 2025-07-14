@@ -35,21 +35,25 @@ interface ProfileSheetProps {
   trigger?: React.ReactNode;
 }
 
+// Move form field definitions outside the component for clarity
+const PROFILE_FIELDS = [
+  { name: "first_name", label: "First Name" },
+  { name: "last_name", label: "Last Name" },
+  { name: "phone", label: "Phone Number" },
+  { name: "alternative_number", label: "Alternative Number" },
+  { name: "date_of_birth", label: "Date of Birth", type: "date" },
+  { name: "address", label: "Address" },
+];
+
 const fetchProfile = async (
   userType: "buyer" | "seller"
 ): Promise<UserProfile> => {
   try {
-    console.log("Fetching profile for userType:", userType);
-
     const data =
       userType === "buyer"
         ? await apiService.getBuyerProfile()
         : await apiService.getSellerProfile();
-
-    console.log("Raw API response:", data);
     let profile = data.data || {};
-
-    // The serializer flattens user fields, so we don't need to merge user data
     return {
       first_name: profile.first_name || "",
       last_name: profile.last_name || "",
@@ -61,7 +65,6 @@ const fetchProfile = async (
       profile_image: profile.profile_image || null,
     };
   } catch (error) {
-    console.error("Profile fetch error:", error);
     throw error;
   }
 };
@@ -71,8 +74,6 @@ const updateProfile = async (
   profileData: UserProfile
 ): Promise<UserProfile> => {
   try {
-    console.log("Updating profile for userType:", userType);
-
     // Create FormData for file upload
     const formData = new FormData();
     Object.entries(profileData).forEach(([key, value]) => {
@@ -80,40 +81,29 @@ const updateProfile = async (
         formData.append(key, value instanceof File ? value : String(value));
       }
     });
-
-    // Use direct fetch for FormData since API service expects JSON
     const token = apiService.getAuthToken();
     if (!token) throw new Error("No authentication token found");
-
     const apiUrl =
       userType === "buyer"
         ? "http://localhost:8000/api/buyer/profile/"
         : "http://localhost:8000/api/seller/profile/";
-
     const response = await fetch(apiUrl, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
     });
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Update profile error response:", errorText);
-
-      // Let the API service handle authentication errors
       if (response.status === 401) {
         apiService.removeAuthToken();
         toast.error("Session expired. Please login again.");
         window.location.href = "/login";
         throw new Error("Authentication expired");
       }
-
       throw new Error("Failed to update profile");
     }
-
     const data = await response.json();
     let updated = data.data || {};
-
     return {
       first_name: updated.first_name || "",
       last_name: updated.last_name || "",
@@ -125,7 +115,6 @@ const updateProfile = async (
       profile_image: updated.profile_image || null,
     };
   } catch (error) {
-    console.error("Profile update error:", error);
     throw error;
   }
 };
@@ -151,33 +140,23 @@ export default function ProfileSheet({
 
   useEffect(() => {
     if (!open || typeof window === "undefined") return;
-
-    // Check if we have a valid token before making the request
     const token = apiService.getAuthToken();
     if (!token) {
-      console.log("No authentication token found");
       toast.error("Please login to view your profile");
       onOpenChange(false);
       window.location.href = "/login";
       return;
     }
-
     setLoading(true);
-    console.log("Fetching profile for userType:", userType);
-    console.log("Token exists:", !!token);
-
     fetchProfile(userType)
       .then((data) => {
-        console.log("Profile data received:", data);
         setProfile(data);
         if (typeof data.profile_image === "string") {
           setPreview(data.profile_image);
         }
       })
       .catch((err) => {
-        console.error("Profile fetch error:", err);
         if (err.message === "Authentication expired") {
-          // Don't show error toast since we're already redirecting
           return;
         }
         toast.error(err.message);
@@ -277,14 +256,7 @@ export default function ProfileSheet({
               </button>
             </div>
 
-            {[
-              { name: "first_name", label: "First Name" },
-              { name: "last_name", label: "Last Name" },
-              { name: "phone", label: "Phone Number" },
-              { name: "alternative_number", label: "Alternative Number" },
-              { name: "date_of_birth", label: "Date of Birth", type: "date" },
-              { name: "address", label: "Address" },
-            ].map(({ name, label, type = "text" }) => (
+            {PROFILE_FIELDS.map(({ name, label, type = "text" }) => (
               <div key={name}>
                 <label className="block mb-1 font-medium">{label}</label>
                 <input
