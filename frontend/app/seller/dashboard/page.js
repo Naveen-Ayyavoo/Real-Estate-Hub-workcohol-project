@@ -22,12 +22,39 @@ import {
   Star,
 } from "lucide-react";
 import Modal from "react-modal";
+import AddEditListingForm from "@/components/ui/AddEditListingForm";
+import MiniImageCarousel from "@/components/ui/MiniImageCarousel";
 
 // Dynamically import ProfileSheet to prevent hydration issues
 const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
   ssr: false,
   loading: () => <div>Loading...</div>,
 });
+
+// Helper to ensure image URLs are absolute
+const getAbsoluteUrl = (url) => {
+  if (!url) return "/placeholder.svg";
+  if (url.startsWith("http")) return url;
+  return `http://localhost:8000${url}`;
+};
+
+// Helper to generate room labels and keys (duplicated from AddEditListingForm for mapping)
+const generateRoomLabels = (beds, baths) => {
+  const labels = [
+    { key: "living_room", label: "Living Room" },
+    { key: "kitchen", label: "Kitchen" },
+    { key: "dining_room", label: "Dining Room" },
+    { key: "exterior", label: "Exterior" },
+    { key: "other", label: "Other" },
+  ];
+  for (let i = 1; i <= beds; i++) {
+    labels.push({ key: `bedroom_${i}`, label: `Bedroom ${i}` });
+  }
+  for (let i = 1; i <= baths; i++) {
+    labels.push({ key: `bathroom_${i}`, label: `Bathroom ${i}` });
+  }
+  return labels;
+};
 
 function SellerDashboardContent() {
   const [activeTab, setActiveTab] = useState("listings");
@@ -68,6 +95,8 @@ function SellerDashboardContent() {
 
   // Add Listing Modal State
   const [addModalOpen, setAddModalOpen] = useState(false);
+
+  // --- Room-based form state ---
   const [form, setForm] = useState({
     title: "",
     property_type: "house",
@@ -79,25 +108,35 @@ function SellerDashboardContent() {
     sqft: "",
     negotiable: false,
     features: "",
+    roomImageUrls: {}, // key: roomKey, value: image URL string (for edit mode)
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [selectedRoomFiles, setSelectedRoomFiles] = useState({}); // key: roomKey, value: File
 
-  // Add after form state
-  const [selectedImages, setSelectedImages] = useState([]);
-
+  // Handle form field changes
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  const handleImageChange = (e) => {
-    setSelectedImages(Array.from(e.target.files));
-  };
-
-  // Add/Edit Modal: if editProperty is set, prefill form and switch to edit mode
+  // Handle Add/Edit Modal: if editProperty is set, prefill form and switch to edit mode
   useEffect(() => {
     if (editProperty) {
+      // Map backend images to roomImageUrls by order (first image to first room, etc.)
+      const allRoomLabels = generateRoomLabels(Number(editProperty.beds) || 0, Number(editProperty.baths) || 0);
+      const roomImageUrls = {};
+      if (Array.isArray(editProperty.images)) {
+        editProperty.images.forEach((img, idx) => {
+          const roomKey = allRoomLabels[idx]?.key;
+          if (roomKey) {
+            roomImageUrls[roomKey] = getAbsoluteUrl(typeof img === 'string' ? img : img.image);
+          }
+        });
+      }
       setAddModalOpen(true);
       setForm({
         title: editProperty.title || "",
@@ -110,24 +149,23 @@ function SellerDashboardContent() {
         sqft: editProperty.sqft || "",
         negotiable: editProperty.negotiable ?? false,
         features: editProperty.features || "",
+        roomImageUrls, // <-- set here
       });
+      setSelectedRoomFiles({});
     }
   }, [editProperty]);
 
-  // Handle Add or Edit Property
+  // Handle Add or Edit Property (room-based images)
   const handleAddProperty = async (e) => {
     e.preventDefault();
     setFormLoading(true);
     setFormError(null);
     const token = localStorage.getItem("access_token");
-    console.log("Access token:", token); // Debug: log the token
     if (!token) {
       setFormLoading(false);
       setFormError(
         "You are not logged in. Please log in as a seller to add a property."
       );
-      // Optionally, redirect to login page:
-      // window.location.href = "/login";
       return;
     }
     try {
@@ -183,29 +221,26 @@ function SellerDashboardContent() {
         throw new Error(msg);
       }
       const propertyData = await res.json();
-      // If images are selected and this is a create (not edit), upload images
-      if (!editProperty && selectedImages.length > 0 && propertyData.id) {
-        const formData = new FormData();
-        selectedImages.forEach((img) => formData.append("images", img));
-        const imgRes = await fetch(
-          `http://localhost:8000/api/properties/${propertyData.id}/upload_images/`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
+
+      // --- Room-based image upload stub ---
+      // Here you would upload each selectedRoomFiles[roomKey] to your backend,
+      // and update the property with the returned image URLs.
+      // For now, we'll just log the files for demonstration.
+      if (Object.keys(selectedRoomFiles).length > 0 && propertyData.id) {
+        // Example: Loop through each room and upload
+        for (const [roomKey, file] of Object.entries(selectedRoomFiles)) {
+          if (file) {
+            // TODO: Replace with actual API call to upload image for this room
+            // Example:
+            // const formData = new FormData();
+            // formData.append("image", file);
+            // await fetch(`http://localhost:8000/api/properties/${propertyData.id}/upload_room_image/${roomKey}/`, { ... })
+            // For now, just log:
+            console.log(`Would upload image for ${roomKey}:`, file);
           }
-        );
-        if (!imgRes.ok) {
-          let msg = "Property created, but failed to upload images.";
-          try {
-            const errData = await imgRes.json();
-            msg = errData.detail || errData.message || JSON.stringify(errData);
-          } catch {}
-          setFormError(msg);
         }
       }
+
       setAddModalOpen(false);
       setEditProperty(null);
       setForm({
@@ -219,8 +254,9 @@ function SellerDashboardContent() {
         sqft: "",
         negotiable: false,
         features: "",
+        roomImageUrls: {},
       });
-      setSelectedImages([]);
+      setSelectedRoomFiles({});
       fetchListings();
     } catch (err) {
       setFormError(err.message || "Error saving property");
@@ -268,6 +304,26 @@ function SellerDashboardContent() {
     } finally {
       setFormLoading(false);
     }
+  };
+
+  // Handle cancel (reset form and close modal)
+  const handleCancel = () => {
+    setAddModalOpen(false);
+    setEditProperty(null);
+    setForm({
+      title: "",
+      property_type: "house",
+      location: "",
+      price: "",
+      description: "",
+      beds: "",
+      baths: "",
+      sqft: "",
+      negotiable: false,
+      features: "",
+      roomImageUrls: {},
+    });
+    setSelectedRoomFiles({});
   };
 
   return (
@@ -361,210 +417,24 @@ function SellerDashboardContent() {
           {/* Add Listing Modal (also used for Edit) */}
           <Modal
             isOpen={addModalOpen}
-            onRequestClose={() => {
-              setAddModalOpen(false);
-              setEditProperty(null);
-              setForm({
-                title: "",
-                property_type: "house",
-                location: "",
-                price: "",
-                description: "",
-                beds: "",
-                baths: "",
-                sqft: "",
-                negotiable: false,
-                features: "",
-              });
-              setSelectedImages([]);
-            }}
+            onRequestClose={handleCancel}
             contentLabel={editProperty ? "Edit Property" : "Add Property"}
             ariaHideApp={false}
             className="fixed inset-0 flex items-center justify-center z-50"
             overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
           >
-            <form
-              onSubmit={handleAddProperty}
-              className="bg-white p-8 rounded shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto"
-            >
-              <h2 className="text-xl font-bold mb-4">
-                {editProperty ? "Edit Property" : "Add New Property"}
-              </h2>
-              <div className="mb-4">
-                <label className="block mb-1">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Type</label>
-                <select
-                  name="property_type"
-                  value={form.property_type}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                >
-                  <option value="house">House</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="condo">Condo</option>
-                  <option value="townhouse">Townhouse</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={form.location}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={form.price}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Description</label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Beds</label>
-                <input
-                  type="number"
-                  name="beds"
-                  value={form.beds}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Baths</label>
-                <input
-                  type="number"
-                  name="baths"
-                  value={form.baths}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Square Feet</label>
-                <input
-                  type="number"
-                  name="sqft"
-                  value={form.sqft}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Negotiable</label>
-                <select
-                  name="negotiable"
-                  value={form.negotiable}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                >
-                  <option value={true}>Yes</option>
-                  <option value={false}>No</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Features</label>
-                <input
-                  type="text"
-                  name="features"
-                  value={form.features}
-                  onChange={handleFormChange}
-                  className="w-full border px-3 py-2 rounded"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-1">Images</label>
-                <input
-                  type="file"
-                  name="images"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  className="w-full border px-3 py-2 rounded"
-                  disabled={formLoading}
-                />
-                {selectedImages.length > 0 && (
-                  <div className="mt-2 text-xs text-gray-600">
-                    {selectedImages.length} image(s) selected
-                  </div>
-                )}
-              </div>
-              {formError && (
-                <div className="text-red-500 mb-2">{formError}</div>
-              )}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAddModalOpen(false);
-                    setEditProperty(null);
-                    setForm({
-                      title: "",
-                      property_type: "house",
-                      location: "",
-                      price: "",
-                      description: "",
-                      beds: "",
-                      baths: "",
-                      sqft: "",
-                      negotiable: false,
-                      features: "",
-                    });
-                    setSelectedImages([]);
-                  }}
-                  className="mr-2 px-4 py-2 rounded border"
-                  disabled={formLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  disabled={formLoading}
-                >
-                  {formLoading
-                    ? editProperty
-                      ? "Saving..."
-                      : "Adding..."
-                    : editProperty
-                    ? "Save Changes"
-                    : "Add Property"}
-                </button>
-              </div>
-            </form>
+            <AddEditListingForm
+              form={form}
+              setForm={setForm}
+              formLoading={formLoading}
+              formError={formError}
+              selectedRoomFiles={selectedRoomFiles}
+              setSelectedRoomFiles={setSelectedRoomFiles}
+              handleFormChange={handleFormChange}
+              handleSubmit={handleAddProperty}
+              onCancel={handleCancel}
+              editMode={!!editProperty}
+            />
           </Modal>
           {/* View Property Modal */}
           <Modal
@@ -669,50 +539,47 @@ function SellerDashboardContent() {
             ) : error ? (
               <div className="text-red-500">{error}</div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Property ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Title
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Location
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {listings.map((property) => (
-                      <tr key={property.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {property.id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {property.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {property.address || property.location}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {property.price}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {property.property_type}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                          <div className="flex gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {listings.map((property) => {
+                  // Robustly map images for the card
+                  let cardImages = [];
+                  if (Array.isArray(property.images) && property.images.length > 0) {
+                    cardImages = property.images
+                      .map(img =>
+                        typeof img === 'string'
+                          ? getAbsoluteUrl(img)
+                          : img && img.image
+                            ? getAbsoluteUrl(img.image)
+                            : null
+                      )
+                      .filter(Boolean);
+                  }
+                  if (cardImages.length === 0 && property.main_image) {
+                    cardImages = [getAbsoluteUrl(property.main_image)];
+                  }
+                  if (cardImages.length === 0) {
+                    cardImages = ["/placeholder.svg"];
+                  }
+                  return (
+                    <div key={property.id} className="flex">
+                      <div className="rounded-lg border bg-white shadow-sm flex flex-col w-full">
+                        <div className="p-4 border-b">
+                          <MiniImageCarousel
+                            images={cardImages}
+                            alt={property.title || "Property"}
+                            width={320}
+                            height={180}
+                            interval={2500}
+                          />
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h2 className="text-lg font-semibold mb-1">{property.title}</h2>
+                            <div className="text-sm text-gray-500 mb-1">{property.address || property.location}</div>
+                            <div className="text-base font-bold text-blue-700 mb-1">{property.price}</div>
+                            <div className="text-xs text-gray-400 mb-2">{property.property_type}</div>
+                          </div>
+                          <div className="flex gap-2 mt-4">
                             <button
                               className="px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition"
                               onClick={() => setViewProperty(property)}
@@ -735,11 +602,11 @@ function SellerDashboardContent() {
                               Delete
                             </button>
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
