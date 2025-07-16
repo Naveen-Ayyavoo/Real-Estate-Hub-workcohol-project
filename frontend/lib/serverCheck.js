@@ -1,3 +1,4 @@
+import { toast } from "@/hooks/use-toast";
 // Utility to check if Django server is running
 export const checkServerStatus = async () => {
   try {
@@ -27,5 +28,5 @@ export const showServerError = () => {
   `;
 
   console.error(errorMessage);
-  alert("Django server is not running. Please start it and try again.");
+  toast({ title: "Django server is not running. Please start it and try again." });
 };

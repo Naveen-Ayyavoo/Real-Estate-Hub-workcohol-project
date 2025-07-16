@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import apiService from "@/lib/api";
 import { Eye as EyeIcon, EyeOff as EyeOffIcon } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function RegisterPage() {
   const [accountType, setAccountType] = useState("buyer");
@@ -151,7 +152,7 @@ export default function RegisterPage() {
 
               // Validate passwords match
               if (formData.password !== formData.confirm_password) {
-                alert("Passwords do not match!");
+                toast({ title: "Passwords do not match!" });
                 return;
               }
 
@@ -159,7 +160,7 @@ export default function RegisterPage() {
               const isPasswordValid =
                 Object.values(passwordValidation).every(Boolean);
               if (!isPasswordValid) {
-                alert("Please meet all password requirements!");
+                toast({ title: "Please meet all password requirements!" });
                 return;
               }
 
@@ -174,7 +175,7 @@ export default function RegisterPage() {
                 });
 
                 if (data.status === "success") {
-                  alert("Registration successful! Please login.");
+                  toast({ title: "Registration successful! Please login." });
                   window.location.href = "/login";
                 } else {
                   // Handle specific error messages
@@ -182,11 +183,11 @@ export default function RegisterPage() {
                   if (data.errors && data.errors.email) {
                     errorMessage = data.errors.email;
                   }
-                  alert(errorMessage);
+                  toast({ title: errorMessage });
                 }
               } catch (error) {
                 console.error("Registration error:", error);
-                alert(error.message || "Registration failed!");
+                toast({ title: error.message || "Registration failed!" });
               }
             }}
           >

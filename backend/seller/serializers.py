@@ -4,10 +4,20 @@ from common.serializers import CustomUserSerializer
 
 class SellerProfileSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer()
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = SellerProfile
-        fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'address', 'image', 'alternative_number', 'date_of_birth', 'gender']
+        fields = ['id', 'user', 'first_name', 'last_name', 'phone', 'address', 'image', 'profile_image', 'alternative_number', 'date_of_birth', 'gender']
+
+    def get_profile_image(self, obj):
+        request = self.context.get('request', None)
+        if obj.image:
+            url = obj.image.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})

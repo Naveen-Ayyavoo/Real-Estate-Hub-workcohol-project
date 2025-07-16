@@ -12,6 +12,10 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.db import models, IntegrityError
+from buyer.models import BuyerProfile
+from buyer.serializers import BuyerProfileSerializer
+from seller.models import SellerProfile
+from seller.serializers import SellerProfileSerializer
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -97,6 +101,22 @@ class UserProfileView(APIView):
             serializer.save()
             return Response({"status": "success", "data": serializer.data, "message": "Profile updated", "errors": None, "pagination": None})
         return Response({"status": "error", "data": None, "message": "Update failed", "errors": serializer.errors, "pagination": None}, status=status.HTTP_400_BAD_REQUEST)
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        if user.user_type == 'buyer':
+            profile, _ = BuyerProfile.objects.get_or_create(user=user)
+            serializer = BuyerProfileSerializer(profile)
+            return Response({"success": True, "data": serializer.data, "message": "Buyer profile fetched", "errors": None, "pagination": None})
+        elif user.user_type == 'seller':
+            profile, _ = SellerProfile.objects.get_or_create(user=user)
+            serializer = SellerProfileSerializer(profile)
+            return Response({"success": True, "data": serializer.data, "message": "Seller profile fetched", "errors": None, "pagination": None})
+        else:
+            serializer = CustomUserSerializer(user, context={'request': request})
+            return Response({"success": True, "data": serializer.data, "message": "User profile fetched", "errors": None, "pagination": None})
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]

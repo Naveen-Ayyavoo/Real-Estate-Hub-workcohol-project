@@ -24,6 +24,9 @@ import {
 import Modal from "react-modal";
 import AddEditListingForm from "@/components/ui/AddEditListingForm";
 import MiniImageCarousel from "@/components/ui/MiniImageCarousel";
+import UserAvatar from "@/components/ui/UserAvatar";
+import DashboardNavbar from "@/components/ui/DashboardNavbar";
+import { formatPrice } from "@/components/ui/PropertyCard";
 
 // Dynamically import ProfileSheet to prevent hydration issues
 const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
@@ -333,301 +336,234 @@ function SellerDashboardContent() {
 
   return (
     <AuthGuard allowedUserType="seller">
-      <div className="min-h-screen bg-gray-50 flex relative">
-        {/* Overlay when sidebar is open */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-30 z-40"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-        {/* Sidebar */}
-        <div
-          className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out flex flex-col`}
-        >
-          <div className="flex items-center justify-between h-16 px-6 border-b">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">R</span>
-              </div>
-              <span className="ml-2 text-xl font-semibold text-gray-900">
-                RealEstateHub
-              </span>
-            </div>
-            {/* Sidebar Close Button */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="ml-2 bg-gray-100 rounded-full p-1 border border-gray-200"
-              aria-label="Close sidebar"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
-            </button>
-          </div>
-          <nav className="mt-6">
-            <div className="px-6 space-y-2">
-              <Link
-                href="#"
-                className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md"
-              >
-                <Home className="w-5 h-5 mr-3" />
-                Current Listings
-              </Link>
-              <button
-                onClick={() => setAddModalOpen(true)}
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
-              >
-                <Plus className="w-5 h-5 mr-3" />
-                Add New Listing
-              </button>
-              <Link
-                href="#"
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-              >
-                <Settings className="w-5 h-5 mr-3" />
-                Account Settings
-              </Link>
-              {/* Replace Profile Link with ProfileSheet trigger */}
-              <button
-                onClick={() => setProfileOpen(true)}
-                className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
-              >
-                <UserCircle className="w-5 h-5 mr-3" />
-                Profile
-              </button>
-            </div>
-          </nav>
+      <DashboardNavbar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        profileOpen={profileOpen}
+        setProfileOpen={setProfileOpen}
+        searchValue={searchType}
+        setSearchValue={setSearchType}
+        dashboardType="seller"
+      >
+        {/* All main content (listings overview, modals, etc.) goes here */}
+        {/* Listings Overview Header with Hamburger Menu */}
+        <div className="mb-8 flex items-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-0">
+            Listings Overview
+          </h1>
         </div>
-
-        {/* Main Content */}
-        <div className="flex-1 p-8">
-          {/* Listings Overview Header with Hamburger Menu */}
-          <div className="mb-8 flex items-center">
-            <button
-              className="mr-4 bg-white rounded-full shadow p-1 border border-gray-200 transition-all"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-            >
-              <Menu className="w-6 h-6 text-gray-700" />
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900 mb-0">
-              Listings Overview
-            </h1>
-          </div>
-          {/* Add Listing Modal (also used for Edit) */}
-          <Modal
-            isOpen={addModalOpen}
-            onRequestClose={handleCancel}
-            contentLabel={editProperty ? "Edit Property" : "Add Property"}
-            ariaHideApp={false}
-            className="fixed inset-0 flex items-center justify-center z-50"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
-          >
-            <AddEditListingForm
-              form={form}
-              setForm={setForm}
-              formLoading={formLoading}
-              formError={formError}
-              selectedRoomFiles={selectedRoomFiles}
-              setSelectedRoomFiles={setSelectedRoomFiles}
-              handleFormChange={handleFormChange}
-              handleSubmit={handleAddProperty}
-              onCancel={handleCancel}
-              editMode={!!editProperty}
-            />
-          </Modal>
-          {/* View Property Modal */}
-          <Modal
-            isOpen={!!viewProperty}
-            onRequestClose={() => setViewProperty(null)}
-            contentLabel="View Property"
-            ariaHideApp={false}
-            className="fixed inset-0 flex items-center justify-center z-50"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
-          >
-            {viewProperty && (
-              <div className="bg-white p-8 rounded shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
-                <h2 className="text-xl font-bold mb-4">Property Details</h2>
-                <div className="mb-2">
-                  <strong>Title:</strong> {viewProperty.title}
-                </div>
-                <div className="mb-2">
-                  <strong>Type:</strong> {viewProperty.property_type}
-                </div>
-                <div className="mb-2">
-                  <strong>Location:</strong>{" "}
-                  {viewProperty.address || viewProperty.location}
-                </div>
-                <div className="mb-2">
-                  <strong>Price:</strong> {viewProperty.price}
-                </div>
-                <div className="mb-2">
-                  <strong>Description:</strong> {viewProperty.description}
-                </div>
-                <div className="mb-2">
-                  <strong>Beds:</strong> {viewProperty.beds}
-                </div>
-                <div className="mb-2">
-                  <strong>Baths:</strong> {viewProperty.baths}
-                </div>
-                <div className="mb-2">
-                  <strong>Square Feet:</strong> {viewProperty.sqft}
-                </div>
-                <div className="mb-2">
-                  <strong>Negotiable:</strong>{" "}
-                  {viewProperty.negotiable ? "Yes" : "No"}
-                </div>
-                <div className="mb-2">
-                  <strong>Features:</strong> {viewProperty.features}
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => setViewProperty(null)}
-                    className="px-4 py-2 rounded border"
-                  >
-                    Close
-                  </button>
-                </div>
+        {/* Add Listing Modal (also used for Edit) */}
+        <Modal
+          isOpen={addModalOpen}
+          onRequestClose={handleCancel}
+          contentLabel={editProperty ? "Edit Property" : "Add Property"}
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
+        >
+          <AddEditListingForm
+            form={form}
+            setForm={setForm}
+            formLoading={formLoading}
+            formError={formError}
+            selectedRoomFiles={selectedRoomFiles}
+            setSelectedRoomFiles={setSelectedRoomFiles}
+            handleFormChange={handleFormChange}
+            handleSubmit={handleAddProperty}
+            onCancel={handleCancel}
+            editMode={!!editProperty}
+          />
+        </Modal>
+        {/* View Property Modal */}
+        <Modal
+          isOpen={!!viewProperty}
+          onRequestClose={() => setViewProperty(null)}
+          contentLabel="View Property"
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
+        >
+          {viewProperty && (
+            <div className="bg-white p-8 rounded shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">Property Details</h2>
+              <div className="mb-2">
+                <strong>Title:</strong> {viewProperty.title}
               </div>
-            )}
-          </Modal>
-
-          {/* Delete Confirmation Modal */}
-          <Modal
-            isOpen={!!deleteProperty}
-            onRequestClose={() => setDeleteProperty(null)}
-            contentLabel="Delete Property"
-            ariaHideApp={false}
-            className="fixed inset-0 flex items-center justify-center z-50"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
-          >
-            {deleteProperty && (
-              <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4 text-red-600">
-                  Delete Property
-                </h2>
-                <p>
-                  Are you sure you want to delete{" "}
-                  <strong>{deleteProperty.title}</strong>?
-                </p>
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={() => setDeleteProperty(null)}
-                    className="mr-2 px-4 py-2 rounded border"
-                    disabled={formLoading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteProperty}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                    disabled={formLoading}
-                  >
-                    {formLoading ? "Deleting..." : "Delete"}
-                  </button>
-                </div>
+              <div className="mb-2">
+                <strong>Type:</strong> {viewProperty.property_type}
               </div>
-            )}
-          </Modal>
-          {/* Listings Overview */}
-          <div className="mb-8">
-            {loading ? (
-              <div>Loading properties...</div>
-            ) : error ? (
-              <div className="text-red-500">{error}</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {listings.map((property) => {
-                  // Robustly map images for the card
-                  let cardImages = [];
-                  if (
-                    Array.isArray(property.images) &&
-                    property.images.length > 0
-                  ) {
-                    cardImages = property.images
-                      .map((img) =>
-                        typeof img === "string"
-                          ? getAbsoluteUrl(img)
-                          : img && img.image
-                          ? getAbsoluteUrl(img.image)
-                          : null
-                      )
-                      .filter(Boolean);
-                  }
-                  if (cardImages.length === 0 && property.main_image) {
-                    cardImages = [getAbsoluteUrl(property.main_image)];
-                  }
-                  if (cardImages.length === 0) {
-                    cardImages = ["/placeholder.svg"];
-                  }
-                  return (
-                    <div key={property.id} className="flex">
-                      <div className="rounded-lg border bg-white shadow-sm flex flex-col w-full">
-                        <div className="p-4 border-b">
-                          <MiniImageCarousel
-                            images={cardImages}
-                            alt={property.title || "Property"}
-                            width={320}
-                            height={180}
-                            interval={2500}
-                          />
+              <div className="mb-2">
+                <strong>Location:</strong>{" "}
+                {viewProperty.address || viewProperty.location}
+              </div>
+              <div className="mb-2">
+                <strong>Price:</strong> {formatPrice(viewProperty.price)}
+              </div>
+              <div className="mb-2">
+                <strong>Description:</strong> {viewProperty.description}
+              </div>
+              <div className="mb-2">
+                <strong>Beds:</strong> {viewProperty.beds}
+              </div>
+              <div className="mb-2">
+                <strong>Baths:</strong> {viewProperty.baths}
+              </div>
+              <div className="mb-2">
+                <strong>Square Feet:</strong> {viewProperty.sqft}
+              </div>
+              <div className="mb-2">
+                <strong>Negotiable:</strong>{" "}
+                {viewProperty.negotiable ? "Yes" : "No"}
+              </div>
+              <div className="mb-2">
+                <strong>Features:</strong> {viewProperty.features}
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setViewProperty(null)}
+                  className="px-4 py-2 rounded border"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={!!deleteProperty}
+          onRequestClose={() => setDeleteProperty(null)}
+          contentLabel="Delete Property"
+          ariaHideApp={false}
+          className="fixed inset-0 flex items-center justify-center z-50"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-40 z-40"
+        >
+          {deleteProperty && (
+            <div className="bg-white p-8 rounded shadow-lg w-full max-w-md">
+              <h2 className="text-xl font-bold mb-4 text-red-600">
+                Delete Property
+              </h2>
+              <p>
+                Are you sure you want to delete{" "}
+                <strong>{deleteProperty.title}</strong>?
+              </p>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={() => setDeleteProperty(null)}
+                  className="mr-2 px-4 py-2 rounded border"
+                  disabled={formLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteProperty}
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  disabled={formLoading}
+                >
+                  {formLoading ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
+          )}
+        </Modal>
+        {/* Listings Overview */}
+        <div className="mb-8">
+          {loading ? (
+            <div>Loading properties...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {listings.map((property) => {
+                // Robustly map images for the card
+                let cardImages = [];
+                if (
+                  Array.isArray(property.images) &&
+                  property.images.length > 0
+                ) {
+                  cardImages = property.images
+                    .map((img) =>
+                      typeof img === "string"
+                        ? getAbsoluteUrl(img)
+                        : img && img.image
+                        ? getAbsoluteUrl(img.image)
+                        : null
+                    )
+                    .filter(Boolean);
+                }
+                if (cardImages.length === 0 && property.main_image) {
+                  cardImages = [getAbsoluteUrl(property.main_image)];
+                }
+                if (cardImages.length === 0) {
+                  cardImages = ["/placeholder.svg"];
+                }
+                return (
+                  <div key={property.id} className="flex">
+                    <div className="rounded-lg border bg-white shadow-sm flex flex-col w-full">
+                      <div className="p-4 border-b">
+                        <MiniImageCarousel
+                          images={cardImages}
+                          alt={property.title || "Property"}
+                          width={320}
+                          height={180}
+                          interval={2500}
+                        />
+                      </div>
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h2 className="text-lg font-semibold mb-1">
+                            {property.title}
+                          </h2>
+                          <div className="text-sm text-gray-500 mb-1">
+                            {property.address || property.location}
+                          </div>
+                          <div className="text-base font-bold text-blue-700 mb-1">
+                            {formatPrice(property.price)}
+                          </div>
+                          <div className="text-xs text-gray-400 mb-2">
+                            {property.property_type}
+                          </div>
                         </div>
-                        <div className="p-4 flex-1 flex flex-col justify-between">
-                          <div>
-                            <h2 className="text-lg font-semibold mb-1">
-                              {property.title}
-                            </h2>
-                            <div className="text-sm text-gray-500 mb-1">
-                              {property.address || property.location}
-                            </div>
-                            <div className="text-base font-bold text-blue-700 mb-1">
-                              {property.price}
-                            </div>
-                            <div className="text-xs text-gray-400 mb-2">
-                              {property.property_type}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 mt-4">
-                            <button
-                              className="px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition"
-                              onClick={() => setViewProperty(property)}
-                              type="button"
-                            >
-                              View
-                            </button>
-                            <button
-                              className="px-3 py-1 rounded bg-yellow-100 text-yellow-700 font-medium hover:bg-yellow-200 transition"
-                              onClick={() => setEditProperty(property)}
-                              type="button"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="px-3 py-1 rounded bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
-                              onClick={() => setDeleteProperty(property)}
-                              type="button"
-                            >
-                              Delete
-                            </button>
-                          </div>
+                        <div className="flex gap-2 mt-4">
+                          <button
+                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition"
+                            onClick={() => setViewProperty(property)}
+                            type="button"
+                          >
+                            View
+                          </button>
+                          <button
+                            className="px-3 py-1 rounded bg-yellow-100 text-yellow-700 font-medium hover:bg-yellow-200 transition"
+                            onClick={() => setEditProperty(property)}
+                            type="button"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="px-3 py-1 rounded bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
+                            onClick={() => setDeleteProperty(property)}
+                            type="button"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-            {/* Place ProfileSheet at the root of the component */}
-            <ProfileSheet
-              userType="seller"
-              open={profileOpen}
-              onOpenChange={setProfileOpen}
-            />
-          </div>
+          {/* Place ProfileSheet at the root of the component */}
+          <ProfileSheet
+            userType="seller"
+            open={profileOpen}
+            onOpenChange={setProfileOpen}
+          />
         </div>
-      </div>
+      </DashboardNavbar>
     </AuthGuard>
   );
 }

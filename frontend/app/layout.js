@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   title: "RealEstate Hub",
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="antialiased" suppressHydrationWarning={true}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

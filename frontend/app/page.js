@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { MapPin, Building2, DollarSign, Bed, Bath, Star } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 export default function HomePage() {
   const [location, setLocation] = useState("");
@@ -113,26 +115,8 @@ export default function HomePage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Improved search logic: score each property by match
-    let bestMatch = null;
-    let bestScore = -1;
-    const searchPrice = price.replace(/[^\d]/g, "");
-    featuredProperties.forEach((p) => {
-      let score = 0;
-      if (location && p.location.toLowerCase().includes(location.toLowerCase()))
-        score++;
-      if (type && type !== "Property Type" && p.type === type) score++;
-      if (price && p.price.replace(/[^\d]/g, "").includes(searchPrice)) score++;
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = p;
-      }
-    });
-    if (bestMatch && bestScore > 0) {
-      router.push(`/property/${bestMatch.id}`);
-    } else {
-      alert("No matching property found.");
-    }
+    toast({ title: "You have to login first" });
+    router.push("/login");
   };
 
   return (
@@ -209,25 +193,7 @@ export default function HomePage() {
           >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg
-                  className="w-5 h-5 text-gray-400 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
+                <MapPin className="w-5 h-5 text-gray-400 mr-2" />
                 <input
                   type="text"
                   placeholder="Location"
@@ -237,19 +203,7 @@ export default function HomePage() {
                 />
               </div>
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg
-                  className="w-5 h-5 text-gray-400 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                  />
-                </svg>
+                <Building2 className="w-5 h-5 text-gray-400 mr-2" />
                 <select
                   className="w-full outline-none bg-transparent"
                   value={type}
@@ -262,19 +216,7 @@ export default function HomePage() {
                 </select>
               </div>
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg
-                  className="w-5 h-5 text-gray-400 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                  />
-                </svg>
+                <DollarSign className="w-5 h-5 text-gray-400 mr-2" />
                 <input
                   type="text"
                   placeholder="Price Range"
@@ -321,35 +263,11 @@ export default function HomePage() {
                 </p>
                 <div className="flex items-center text-sm text-gray-600 space-x-4">
                   <span className="flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                      />
-                    </svg>
+                    <Bed className="w-4 h-4 mr-1" />
                     {property.beds} Beds
                   </span>
                   <span className="flex items-center">
-                    <svg
-                      className="w-4 h-4 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"
-                      />
-                    </svg>
+                    <Bath className="w-4 h-4 mr-1" />
                     {property.baths} Baths
                   </span>
                   <span>{property.sqft}</span>
@@ -380,8 +298,8 @@ export default function HomePage() {
             What Our Clients Say
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.name} className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">
@@ -394,13 +312,7 @@ export default function HomePage() {
                     </h4>
                     <div className="flex text-yellow-400">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className="w-4 h-4 fill-current"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                       ))}
                     </div>
                   </div>
@@ -485,12 +397,10 @@ export default function HomePage() {
                   className="bg-blue-600 px-6 py-2 rounded-r-md hover:bg-blue-700"
                   onClick={() => {
                     if (subscriberEmail) {
-                      alert(
-                        "You have subscribed to RealEstate Hub. Stay tuned for new updates."
-                      );
+                      toast({ title: "You have subscribed to RealEstate Hub. Stay tuned for new updates." });
                       setSubscriberEmail("");
                     } else {
-                      alert("Please enter a valid email address.");
+                      toast({ title: "Please enter a valid email address." });
                     }
                   }}
                 >
