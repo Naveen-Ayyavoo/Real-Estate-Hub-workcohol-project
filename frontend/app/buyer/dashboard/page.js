@@ -18,6 +18,7 @@ import {
   Star,
 } from "lucide-react";
 import { Heart as HeartIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Dynamically import ProfileSheet to prevent hydration issues
 const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
@@ -30,6 +31,9 @@ function BuyerDashboardContent() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [viewProperty, setViewProperty] = useState(null);
   const [savedProperties, setSavedProperties] = useState([]);
+  const [searchType, setSearchType] = useState("");
+  const [filteredProperties, setFilteredProperties] = useState([]);
+  const router = useRouter();
 
   // Dynamic properties from backend
   const [recommendedProperties, setRecommendedProperties] = useState([]);
@@ -65,6 +69,20 @@ function BuyerDashboardContent() {
     fetchProperties();
   }, []);
 
+  useEffect(() => {
+    if (searchType.trim()) {
+      setFilteredProperties(
+        recommendedProperties.filter((p) =>
+          p.property_type
+            ?.toLowerCase()
+            .includes(searchType.trim().toLowerCase())
+        )
+      );
+    } else {
+      setFilteredProperties(recommendedProperties);
+    }
+  }, [searchType, recommendedProperties]);
+
   const appointments = [
     {
       address: "123 Maple Dr, Suburbia",
@@ -90,15 +108,6 @@ function BuyerDashboardContent() {
     <AuthGuard allowedUserType="buyer">
       <div className="min-h-screen bg-gray-50 flex relative">
         {/* Sidebar Toggle Button (when closed) */}
-        {!sidebarOpen && (
-          <button
-            className="fixed top-6 left-2 z-50 bg-white rounded-full shadow p-1 border border-gray-200 transition-all"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
-          >
-            <Menu className="w-6 h-6 text-gray-700" />
-          </button>
-        )}
         {/* Overlay when sidebar is open */}
         {sidebarOpen && (
           <div
@@ -241,21 +250,10 @@ function BuyerDashboardContent() {
               <div className="flex items-center">
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden mr-4"
+                  className="mr-4"
+                  aria-label="Open sidebar"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
+                  <Menu className="w-6 h-6 text-gray-700" />
                 </button>
                 <Link href="/" className="text-gray-600 hover:text-gray-900">
                   Home
@@ -263,11 +261,20 @@ function BuyerDashboardContent() {
               </div>
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search properties..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      // No redirect, just filter
+                    }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Search properties..."
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={searchType}
+                      onChange={(e) => setSearchType(e.target.value)}
+                    />
+                  </form>
                   <svg
                     className="w-5 h-5 text-gray-400 absolute left-3 top-2.5"
                     fill="none"
@@ -465,7 +472,10 @@ function BuyerDashboardContent() {
                   <div className="text-red-500">{error}</div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recommendedProperties.map((property) => (
+                    {(filteredProperties.length > 0
+                      ? filteredProperties
+                      : []
+                    ).map((property) => (
                       <div
                         key={property.id}
                         className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"

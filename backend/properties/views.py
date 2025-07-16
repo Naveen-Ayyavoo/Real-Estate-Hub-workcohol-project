@@ -126,6 +126,19 @@ class PropertyViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
+class PropertyImageViewSet(viewsets.ModelViewSet):
+    queryset = PropertyImage.objects.all()
+    serializer_class = PropertyImageSerializer
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Only allow sellers to upload images for their own properties
+        property_obj = serializer.validated_data.get('property')
+        if self.request.user != property_obj.seller:
+            raise PermissionDenied('You do not own this property.')
+        serializer.save()
+
 class PropertyAnalyticsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):

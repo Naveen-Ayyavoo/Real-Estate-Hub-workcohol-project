@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PropertyViewSet
-from .views import PropertyAnalyticsView
+from .views import PropertyViewSet, PropertyAnalyticsView, PropertyImageViewSet
 
 router = DefaultRouter()
 router.register(r'', PropertyViewSet, basename='property')
+router.register(r'propertyimages', PropertyImageViewSet, basename='propertyimage')
 
 urlpatterns = [
     path('', include(router.urls)),

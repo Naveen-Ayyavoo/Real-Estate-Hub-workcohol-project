@@ -19,11 +19,6 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
-from rest_framework.routers import DefaultRouter
-from bookings.views import FavoriteViewSet
-
-router = DefaultRouter()
-router.register(r'saved', FavoriteViewSet, basename='saved')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

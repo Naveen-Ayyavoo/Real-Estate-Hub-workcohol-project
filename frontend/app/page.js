@@ -1,7 +1,18 @@
-import Link from "next/link"
-import Image from "next/image"
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const [location, setLocation] = useState("");
+  const [type, setType] = useState("");
+  const [price, setPrice] = useState("");
+  const router = useRouter();
+  const searchFormRef = useRef(null);
+  const [subscriberEmail, setSubscriberEmail] = useState("");
+
   const featuredProperties = [
     {
       id: 1,
@@ -75,7 +86,7 @@ export default function HomePage() {
       baths: 4,
       sqft: "3,600 sqft",
     },
-  ]
+  ];
 
   const testimonials = [
     {
@@ -98,7 +109,31 @@ export default function HomePage() {
       rating: 5,
       text: "Fantastic experience! The platform was user-friendly and the virtual tours were a game-changer. Saved us so much time!",
     },
-  ]
+  ];
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // Improved search logic: score each property by match
+    let bestMatch = null;
+    let bestScore = -1;
+    const searchPrice = price.replace(/[^\d]/g, "");
+    featuredProperties.forEach((p) => {
+      let score = 0;
+      if (location && p.location.toLowerCase().includes(location.toLowerCase()))
+        score++;
+      if (type && type !== "Property Type" && p.type === type) score++;
+      if (price && p.price.replace(/[^\d]/g, "").includes(searchPrice)) score++;
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = p;
+      }
+    });
+    if (bestMatch && bestScore > 0) {
+      router.push(`/property/${bestMatch.id}`);
+    } else {
+      alert("No matching property found.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -106,28 +141,42 @@ export default function HomePage() {
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-6">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="ml-2 text-xl font-semibold text-gray-900">RealEstate Hub</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-blue-600">
-                Home
-              </Link>
-              <Link href="#" className="text-gray-700 hover:text-blue-600">
-                Sell
-              </Link>
-              <Link href="#" className="text-gray-700 hover:text-blue-600">
-                Buy
-              </Link>
+              <span className="ml-2 text-xl font-semibold text-gray-900">
+                RealEstate Hub
+              </span>
+              <div className="hidden md:flex items-center space-x-4 ml-6">
+                <Link
+                  href="/help"
+                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
+                >
+                  How It Works
+                </Link>
+                <Link
+                  href="/sell"
+                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
+                >
+                  For Sellers
+                </Link>
+                <Link
+                  href="/buy"
+                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
+                >
+                  For Buyers
+                </Link>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/login" className="text-gray-700 hover:text-blue-600">
                 Login
               </Link>
-              <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              <Link
+                href="/register"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
                 Register
               </Link>
             </div>
@@ -137,19 +186,35 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <div className="relative h-96 md:h-[500px] bg-gray-200">
-        <Image src="/placeholder.svg?height=500&width=1200" alt="Hero background" fill className="object-cover" />
+        <Image
+          src="/placeholder.svg?height=500&width=1200"
+          alt="Hero background"
+          fill
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">Find Your Dream Property</h1>
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            Find Your Dream Property
+          </h1>
           <p className="text-lg md:text-xl text-white mb-8 max-w-2xl">
             Explore the finest properties and connect with trusted experts.
           </p>
 
           {/* Search Form */}
-          <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-4xl">
+          <form
+            ref={searchFormRef}
+            onSubmit={handleSearch}
+            className="bg-white rounded-lg p-6 shadow-lg w-full max-w-4xl"
+          >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5 text-gray-400 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -163,10 +228,21 @@ export default function HomePage() {
                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
-                <input type="text" placeholder="Location" className="w-full outline-none" />
+                <input
+                  type="text"
+                  placeholder="Location"
+                  className="w-full outline-none"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
               </div>
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5 text-gray-400 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -174,7 +250,11 @@ export default function HomePage() {
                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
                 </svg>
-                <select className="w-full outline-none bg-transparent">
+                <select
+                  className="w-full outline-none bg-transparent"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
                   <option>Property Type</option>
                   <option>House</option>
                   <option>Apartment</option>
@@ -182,7 +262,12 @@ export default function HomePage() {
                 </select>
               </div>
               <div className="flex items-center border rounded-md px-3 py-2">
-                <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5 text-gray-400 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -190,19 +275,30 @@ export default function HomePage() {
                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                   />
                 </svg>
-                <input type="text" placeholder="Price Range" className="w-full outline-none" />
+                <input
+                  type="text"
+                  placeholder="Price Range"
+                  className="w-full outline-none"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                />
               </div>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium"
+              >
                 Search Properties
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
 
       {/* Featured Listings */}
       <section className="py-16 px-4 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Featured Listings</h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          Featured Listings
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredProperties.map((property) => (
             <div
@@ -217,11 +313,20 @@ export default function HomePage() {
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-1">{property.location}</h3>
-                <p className="text-2xl font-bold text-blue-600 mb-2">{property.price}</p>
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  {property.location}
+                </h3>
+                <p className="text-2xl font-bold text-blue-600 mb-2">
+                  {property.price}
+                </p>
                 <div className="flex items-center text-sm text-gray-600 space-x-4">
                   <span className="flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -232,7 +337,12 @@ export default function HomePage() {
                     {property.beds} Beds
                   </span>
                   <span className="flex items-center">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -244,34 +354,51 @@ export default function HomePage() {
                   </span>
                   <span>{property.sqft}</span>
                 </div>
-                <button className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors">
-                  View Details
-                </button>
+                <Link href={`/property/${property.id}`} passHref legacyBehavior>
+                  <a className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors block text-center">
+                    View Details
+                  </a>
+                </Link>
               </div>
             </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <button className="text-blue-600 hover:text-blue-700 font-medium">Browse All Listings</button>
+        <div className="flex justify-center mt-8">
+          <Link
+            href="/listings"
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium"
+          >
+            Browse All Listings
+          </Link>
         </div>
       </section>
 
       {/* Testimonials */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">What Our Clients Say</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            What Our Clients Say
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {testimonials.map((testimonial, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-md">
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">{testimonial.name.charAt(0)}</span>
+                    <span className="text-white font-semibold text-sm">
+                      {testimonial.name.charAt(0)}
+                    </span>
                   </div>
                   <div className="ml-3">
-                    <h4 className="font-semibold text-gray-900">{testimonial.name}</h4>
+                    <h4 className="font-semibold text-gray-900">
+                      {testimonial.name}
+                    </h4>
                     <div className="flex text-yellow-400">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <svg
+                          key={i}
+                          className="w-4 h-4 fill-current"
+                          viewBox="0 0 20 20"
+                        >
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                       ))}
@@ -288,16 +415,28 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16 bg-blue-50">
         <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Make Your Move?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Ready to Make Your Move?
+          </h2>
           <p className="text-lg text-gray-600 mb-8">
-            Whether you're buying, selling, or just exploring, RealEstate Hub is here to guide you every step of the
-            way.
+            Whether you're buying, selling, or just exploring, RealEstate Hub is
+            here to guide you every step of the way.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 font-medium">
+            <button
+              className="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 font-medium"
+              onClick={() => {
+                if (searchFormRef.current) {
+                  searchFormRef.current.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
               Start Your Search
             </button>
-            <button className="border border-blue-600 text-blue-600 px-8 py-3 rounded-md hover:bg-blue-50 font-medium">
+            <button
+              className="border border-blue-600 text-blue-600 px-8 py-3 rounded-md hover:bg-blue-50 font-medium"
+              onClick={() => router.push("/register")}
+            >
               Register Today
             </button>
           </div>
@@ -307,7 +446,9 @@ export default function HomePage() {
       {/* Partners */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">Our Trusted Partners</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-8">
+            Our Trusted Partners
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-8 items-center opacity-60">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="flex justify-center">
@@ -329,14 +470,32 @@ export default function HomePage() {
               <span className="ml-2 text-xl font-semibold">RealEstate Hub</span>
             </div>
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Stay Updated with RealEstate Hub</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Stay Updated with RealEstate Hub
+              </h3>
               <div className="flex max-w-md mx-auto">
                 <input
                   type="email"
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-2 rounded-l-md text-gray-900"
+                  value={subscriberEmail}
+                  onChange={(e) => setSubscriberEmail(e.target.value)}
                 />
-                <button className="bg-blue-600 px-6 py-2 rounded-r-md hover:bg-blue-700">Subscribe</button>
+                <button
+                  className="bg-blue-600 px-6 py-2 rounded-r-md hover:bg-blue-700"
+                  onClick={() => {
+                    if (subscriberEmail) {
+                      alert(
+                        "You have subscribed to RealEstate Hub. Stay tuned for new updates."
+                      );
+                      setSubscriberEmail("");
+                    } else {
+                      alert("Please enter a valid email address.");
+                    }
+                  }}
+                >
+                  Subscribe
+                </button>
               </div>
             </div>
             <div className="text-sm text-gray-400">
@@ -347,5 +506,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

@@ -28,6 +28,8 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media/
+!media/property_images/
+!media/property_images/**
 
 # Environment variables
 .env

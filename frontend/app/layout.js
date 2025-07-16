@@ -1,15 +1,17 @@
-import "./globals.css"
+import "./globals.css";
 
 export const metadata = {
   title: "RealEstate Hub",
   description: "Find your dream property",
-    generator: 'v0.dev'
-}
+  generator: "v0.dev",
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="antialiased" suppressHydrationWarning={true}>{children}</body>
+      <body className="antialiased" suppressHydrationWarning={true}>
+        {children}
+      </body>
     </html>
-  )
+  );
 }
