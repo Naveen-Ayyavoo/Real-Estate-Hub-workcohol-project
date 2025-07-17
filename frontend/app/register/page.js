@@ -66,7 +66,7 @@ export default function RegisterPage() {
 
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Create Your RealEstate Hub Account
+              Create Your WorkSquare Account
             </h1>
             <p className="text-gray-600">
               Join us today to manage your properties or find your dream home.

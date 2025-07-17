@@ -33,7 +33,7 @@ export default function DashboardNavbar({
               <span className="text-white font-bold text-sm">R</span>
             </div>
             <span className="ml-2 text-lg font-semibold text-gray-900">
-              RealEstate Hub
+              WorkSquare
             </span>
           </div>
           {/* Sidebar Close Button */}

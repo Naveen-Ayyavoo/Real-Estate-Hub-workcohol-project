@@ -2,7 +2,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
-  title: "RealEstate Hub",
+  title: "WorkSquare",
   description: "Find your dream property",
   generator: "v0.dev",
 };

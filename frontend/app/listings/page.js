@@ -87,7 +87,7 @@ export default function ListingsPage() {
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="ml-2 text-xl font-semibold text-gray-900">
-                RealEstate Hub
+                WorkSquare
               </span>
             </div>
             <div className="flex items-center space-x-6">

@@ -27,6 +27,7 @@ import MiniImageCarousel from "@/components/ui/MiniImageCarousel";
 import UserAvatar from "@/components/ui/UserAvatar";
 import DashboardNavbar from "@/components/ui/DashboardNavbar";
 import { formatPrice } from "@/components/ui/PropertyCard";
+import PropertyCard from "@/components/ui/PropertyCard";
 
 // Dynamically import ProfileSheet to prevent hydration issues
 const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
@@ -476,7 +477,7 @@ function SellerDashboardContent() {
           ) : error ? (
             <div className="text-red-500">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {listings.map((property) => {
                 // Robustly map images for the card
                 let cardImages = [];
@@ -501,58 +502,41 @@ function SellerDashboardContent() {
                   cardImages = ["/placeholder.svg"];
                 }
                 return (
-                  <div key={property.id} className="flex">
-                    <div className="rounded-lg border bg-white shadow-sm flex flex-col w-full">
-                      <div className="p-4 border-b">
-                        <MiniImageCarousel
-                          images={cardImages}
-                          alt={property.title || "Property"}
-                          width={320}
-                          height={180}
-                          interval={2500}
-                        />
-                      </div>
-                      <div className="p-4 flex-1 flex flex-col justify-between">
-                        <div>
-                          <h2 className="text-lg font-semibold mb-1">
-                            {property.title}
-                          </h2>
-                          <div className="text-sm text-gray-500 mb-1">
-                            {property.address || property.location}
-                          </div>
-                          <div className="text-base font-bold text-blue-700 mb-1">
-                            {formatPrice(property.price)}
-                          </div>
-                          <div className="text-xs text-gray-400 mb-2">
-                            {property.property_type}
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-4">
-                          <button
-                            className="px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition"
-                            onClick={() => setViewProperty(property)}
-                            type="button"
-                          >
-                            View
-                          </button>
-                          <button
-                            className="px-3 py-1 rounded bg-yellow-100 text-yellow-700 font-medium hover:bg-yellow-200 transition"
-                            onClick={() => setEditProperty(property)}
-                            type="button"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="px-3 py-1 rounded bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
-                            onClick={() => setDeleteProperty(property)}
-                            type="button"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <PropertyCard
+                    key={property.id}
+                    id={property.id}
+                    image={cardImages[0]}
+                    location={property.address || property.location}
+                    price={property.price}
+                    beds={property.beds}
+                    baths={property.baths}
+                    sqft={property.sqft}
+                    actions={
+                      <>
+                        <button
+                          className="px-3 py-1 rounded bg-blue-100 text-blue-700 font-medium hover:bg-blue-200 transition"
+                          onClick={() => setViewProperty(property)}
+                          type="button"
+                        >
+                          View
+                        </button>
+                        <button
+                          className="px-3 py-1 rounded bg-yellow-100 text-yellow-700 font-medium hover:bg-yellow-200 transition"
+                          onClick={() => setEditProperty(property)}
+                          type="button"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="px-3 py-1 rounded bg-red-100 text-red-700 font-medium hover:bg-red-200 transition"
+                          onClick={() => setDeleteProperty(property)}
+                          type="button"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    }
+                  />
                 );
               })}
             </div>

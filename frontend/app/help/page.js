@@ -11,7 +11,7 @@ export default function HelpPage() {
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="ml-2 text-xl font-semibold text-gray-900">
-                RealEstate Hub
+                WorkSquare
               </span>
             </div>
             <div className="flex items-center space-x-6">
@@ -38,7 +38,7 @@ export default function HelpPage() {
         {/* 1. Quick Overview */}
         <h1 className="text-3xl font-bold mb-2 text-blue-700">How It Works</h1>
         <p className="text-lg mb-6">
-          RealEstate Hub simplifies property transactions by connecting trusted
+          WorkSquare simplifies property transactions by connecting trusted
           buyers and sellers in a secure, transparent platform.
         </p>
 

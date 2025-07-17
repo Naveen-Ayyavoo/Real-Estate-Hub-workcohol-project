@@ -11,7 +11,7 @@ export function formatPrice(price) {
   return `$${price}`;
 }
 
-export default function PropertyCard({ id, image, location, price, beds, baths, sqft, detailsLink }) {
+export default function PropertyCard({ id, image, location, price, beds, baths, sqft, detailsLink, actions }) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <Image
@@ -35,11 +35,15 @@ export default function PropertyCard({ id, image, location, price, beds, baths, 
           </span>
           <span>{sqft}</span>
         </div>
-        <Link href={detailsLink || `/property/${id}`} passHref legacyBehavior>
-          <a className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors block text-center">
-            View Details
-          </a>
-        </Link>
+        {actions ? (
+          <div className="w-full mt-4 flex gap-2">{actions}</div>
+        ) : (
+          <Link href={detailsLink || `/property/${id}`} passHref legacyBehavior>
+            <a className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors block text-center">
+              View Details
+            </a>
+          </Link>
+        )}
       </div>
     </div>
   );

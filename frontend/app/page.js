@@ -94,7 +94,7 @@ export default function HomePage() {
     {
       name: "Sarah J.",
       rating: 5,
-      text: "RealEstate Hub made finding our dream home a breeze! The search filters were incredibly helpful, and the listings were always up-to-date. Highly recommend!",
+      text: "WorkSquare made finding our dream home a breeze! The search filters were incredibly helpful, and the listings were always up-to-date. Highly recommend!",
     },
     {
       name: "Michael P.",
@@ -104,7 +104,7 @@ export default function HomePage() {
     {
       name: "Emily R.",
       rating: 5,
-      text: "The team at RealEstate Hub provided exceptional support. Their expertise helped me navigate the complex buying process with confidence.",
+      text: "The team at WorkSquare provided exceptional support. Their expertise helped me navigate the complex buying process with confidence.",
     },
     {
       name: "David L.",
@@ -124,36 +124,45 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex flex-col md:flex-row md:justify-between items-center h-16">
             <div className="flex items-center space-x-6">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
               <span className="ml-2 text-xl font-semibold text-gray-900">
-                RealEstate Hub
+                WorkSquare
               </span>
-              <div className="hidden md:flex items-center space-x-4 ml-6">
-                <Link
-                  href="/help"
-                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
-                >
-                  How It Works
-                </Link>
-                <Link
-                  href="/sell"
-                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
-                >
-                  For Sellers
-                </Link>
-                <Link
-                  href="/buy"
-                  className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
-                >
-                  For Buyers
-                </Link>
-              </div>
             </div>
-            <div className="flex items-center space-x-4">
+            {/* Centered About, Sell, Buy links */}
+            <div className="hidden md:flex items-center space-x-4 justify-center flex-1">
+              <Link
+                href="/help"
+                className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
+              >
+                About
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  toast({ title: "You have to login first" });
+                  setTimeout(() => router.push("/login"), 500);
+                }}
+                className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors"
+              >
+                Sell
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  toast({ title: "You have to login first" });
+                  setTimeout(() => router.push("/login"), 500);
+                }}
+                className="px-4 py-2 rounded-full font-semibold text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white transition-colors "
+              >
+                Buy
+              </button>
+            </div>
+            <div className="flex items-center space-x-4 mt-2 md:mt-0">
               <Link href="/login" className="text-gray-700 hover:text-blue-600">
                 Login
               </Link>
@@ -331,7 +340,7 @@ export default function HomePage() {
             Ready to Make Your Move?
           </h2>
           <p className="text-lg text-gray-600 mb-8">
-            Whether you're buying, selling, or just exploring, RealEstate Hub is
+            Whether you're buying, selling, or just exploring, WorkSquare is
             here to guide you every step of the way.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -379,11 +388,11 @@ export default function HomePage() {
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-sm">R</span>
               </div>
-              <span className="ml-2 text-xl font-semibold">RealEstate Hub</span>
+              <span className="ml-2 text-xl font-semibold">WorkSquare</span>
             </div>
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">
-                Stay Updated with RealEstate Hub
+                Stay Updated with WorkSquare
               </h3>
               <div className="flex max-w-md mx-auto">
                 <input
@@ -397,7 +406,7 @@ export default function HomePage() {
                   className="bg-blue-600 px-6 py-2 rounded-r-md hover:bg-blue-700"
                   onClick={() => {
                     if (subscriberEmail) {
-                      toast({ title: "You have subscribed to RealEstate Hub. Stay tuned for new updates." });
+                      toast({ title: "You have subscribed to WorkSquare. Stay tuned for new updates." });
                       setSubscriberEmail("");
                     } else {
                       toast({ title: "Please enter a valid email address." });
@@ -409,7 +418,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="text-sm text-gray-400">
-              <p>© 2023 RealEstate Hub.</p>
+              <p>© 2023 WorkSquare.</p>
               <p className="mt-2">English</p>
             </div>
           </div>
