@@ -334,6 +334,8 @@ function SellerDashboardContent() {
     setSelectedRoomFiles({});
   };
 
+  const [searchType, setSearchType] = useState("");
+
   return (
     <AuthGuard allowedUserType="seller">
       <DashboardNavbar
