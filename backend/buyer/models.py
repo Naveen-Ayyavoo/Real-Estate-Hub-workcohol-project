@@ -8,9 +8,9 @@ class BuyerProfile(models.Model):
     phone = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to='profiles/', null=True, blank=True)
-    preferences = models.TextField(blank=True, null=True)
     alternative_number = models.CharField(max_length=20, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
+    preferences = models.TextField(blank=True, null=True)
     GENDER_CHOICES = [
         ('Male', 'Male'),
         ('Female', 'Female'),

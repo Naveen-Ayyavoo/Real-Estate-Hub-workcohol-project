@@ -28,6 +28,7 @@ export default function UserAvatar({ size = 8 }) {
         });
         const data = await res.json();
         if (data.data) {
+          console.log('UserAvatar profile:', data.data); // DEBUG
           setProfile(data.data);
           localStorage.setItem("user_profile", JSON.stringify(data.data));
         } else {
@@ -47,10 +48,18 @@ export default function UserAvatar({ size = 8 }) {
     );
   }
 
-  if (profile && profile.profile_image) {
+  function getProfileImageUrl(profile) {
+    const url = profile?.profile_image || profile?.image;
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `http://localhost:8000${url}`;
+  }
+
+  const imageUrl = getProfileImageUrl(profile);
+  if (imageUrl) {
     return (
       <Image
-        src={profile.profile_image}
+        src={imageUrl}
         alt="Profile"
         width={size * 8}
         height={size * 8}

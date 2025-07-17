@@ -114,6 +114,39 @@ function BuyerDashboardContent() {
   const [filteredProperties, setFilteredProperties] = useState([]);
   const router = useRouter();
 
+  // Profile state for greeting
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      setProfileLoading(true);
+      try {
+        const userType = localStorage.getItem("user_type");
+        let endpoint = "/api/profile/";
+        if (userType === "buyer") {
+          endpoint = "/api/buyer/profile/";
+        } else if (userType === "seller") {
+          endpoint = "/api/seller/profile/";
+        }
+        const token = localStorage.getItem("access_token");
+        const res = await fetch(endpoint, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.data) {
+          setProfile(data.data);
+        } else if (data.success || data.status === "success") {
+          setProfile(data.data);
+        }
+      } catch (e) {
+        // ignore error, fallback to generic greeting
+      }
+      setProfileLoading(false);
+    }
+    fetchProfile();
+  }, []);
+
   // Dynamic properties from backend
   const [recommendedProperties, setRecommendedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -216,33 +249,12 @@ function BuyerDashboardContent() {
             </h1>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  Welcome Back, Sarah!
-                </h2>
                 <p className="text-gray-600">
                   Here's a quick overview of your property activities and
                   market insights.
                 </p>
               </div>
-              <button
-                className="flex items-center text-blue-600 hover:text-blue-700"
-                onClick={() => (window.location.href = "/profile")}
-              >
-                <svg
-                  className="w-5 h-5 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-                My Profile
-              </button>
+              {/* Remove the My Profile button */}
             </div>
           </div>
 

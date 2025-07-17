@@ -67,7 +67,7 @@ const fetchProfile = async (
   } catch (error) {
     throw error;
   }
-};
+};  
 
 const updateProfile = async (
   userType: "buyer" | "seller",
@@ -78,7 +78,12 @@ const updateProfile = async (
     const formData = new FormData();
     Object.entries(profileData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        formData.append(key, value instanceof File ? value : String(value));
+        // Use 'image' as the key for the file upload, otherwise keep the original key
+        if (key === 'profile_image' && value instanceof File) {
+          formData.append('image', value);
+        } else if (key !== 'profile_image') {
+          formData.append(key, value instanceof File ? value : String(value));
+        }
       }
     });
     const token = apiService.getAuthToken();
