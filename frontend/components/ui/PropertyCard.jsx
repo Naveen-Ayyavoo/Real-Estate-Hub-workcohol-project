@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Bed, Bath } from "lucide-react";
+import MiniImageCarousel from "@/components/ui/MiniImageCarousel";
 
 // Helper to format price with a single dollar sign
 export function formatPrice(price) {
@@ -11,19 +12,41 @@ export function formatPrice(price) {
   return `$${price}`;
 }
 
-export default function PropertyCard({ id, image, location, price, beds, baths, sqft, detailsLink, actions }) {
+export default function PropertyCard({
+  id,
+  image,
+  images,
+  location,
+  price,
+  beds,
+  baths,
+  sqft,
+  detailsLink,
+  actions,
+}) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <Image
-        src={image || "/placeholder.svg"}
-        alt={location}
-        width={400}
-        height={300}
-        className="w-full h-48 object-cover"
-      />
+      {Array.isArray(images) && images.length > 0 ? (
+        <MiniImageCarousel
+          images={images}
+          alt={location}
+          width={400}
+          height={300}
+        />
+      ) : (
+        <Image
+          src={image || "/placeholder.svg"}
+          alt={location}
+          width={400}
+          height={300}
+          className="w-full h-48 object-cover"
+        />
+      )}
       <div className="p-4">
         <h3 className="font-semibold text-gray-900 mb-1">{location}</h3>
-        <p className="text-2xl font-bold text-blue-600 mb-2">{formatPrice(price)}</p>
+        <p className="text-2xl font-bold text-blue-600 mb-2">
+          {formatPrice(price)}
+        </p>
         <div className="flex items-center text-sm text-gray-600 space-x-4">
           <span className="flex items-center">
             <Bed className="w-4 h-4 mr-1" />
@@ -47,4 +70,4 @@ export default function PropertyCard({ id, image, location, price, beds, baths, 
       </div>
     </div>
   );
-} 
+}

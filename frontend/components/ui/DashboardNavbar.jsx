@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { Menu, ChevronLeft, Home, Search, Heart, Calendar, UserCircle, Mail } from "lucide-react";
+import {
+  Menu,
+  ChevronLeft,
+  Home,
+  Search,
+  Heart,
+  Calendar,
+  UserCircle,
+  Mail,
+} from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 
 export default function DashboardNavbar({
@@ -47,42 +56,96 @@ export default function DashboardNavbar({
         </div>
         <nav className="mt-6">
           <div className="px-6 space-y-2">
-            <Link
-              href={`/${dashboardType}/dashboard`}
-              className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md"
-            >
-              <Home className="w-5 h-5 mr-3" />
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              <Search className="w-5 h-5 mr-3" />
-              Browse
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              <Heart className="w-5 h-5 mr-3" />
-              Saved Properties
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-            >
-              <Calendar className="w-5 h-5 mr-3" />
-              Appointments
-            </Link>
-            {/* Replace Profile Link with ProfileSheet trigger */}
-            <button
-              onClick={() => setProfileOpen(true)}
-              className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
-            >
-              <UserCircle className="w-5 h-5 mr-3" />
-              Profile
-            </button>
+            {dashboardType === "seller" ? (
+              <>
+                <Link
+                  href="/seller/dashboard"
+                  className="flex px-4 py-2 text-white bg-blue-600 rounded-md"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/seller/dashboard?tab=my-listings"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  My Listings
+                </Link>
+                <Link
+                  href="/seller/dashboard?tab=add-listing"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Add Listing
+                </Link>
+                <Link
+                  href="/seller/dashboard/messages"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Messages
+                </Link>
+                <Link
+                  href="/seller/dashboard/appointments"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Appointments
+                </Link>
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
+                >
+                  Profile
+                </button>
+                <Link
+                  href="/settings"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Settings
+                </Link>
+                <Link
+                  href="/logout"
+                  className="flex px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  Logout
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={`/${dashboardType}/dashboard`}
+                  className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md"
+                >
+                  <Home className="w-5 h-5 mr-3" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  <Search className="w-5 h-5 mr-3" />
+                  Browse
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  <Heart className="w-5 h-5 mr-3" />
+                  Saved Properties
+                </Link>
+                <Link
+                  href="#"
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
+                >
+                  <Calendar className="w-5 h-5 mr-3" />
+                  Appointments
+                </Link>
+                <button
+                  onClick={() => setProfileOpen(true)}
+                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md w-full"
+                >
+                  <UserCircle className="w-5 h-5 mr-3" />
+                  Profile
+                </button>
+              </>
+            )}
           </div>
         </nav>
       </div>
@@ -115,7 +178,9 @@ export default function DashboardNavbar({
                     placeholder="Search properties..."
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchValue}
-                    onChange={(e) => setSearchValue && setSearchValue(e.target.value)}
+                    onChange={(e) =>
+                      setSearchValue && setSearchValue(e.target.value)
+                    }
                   />
                 </form>
                 <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
@@ -133,4 +198,4 @@ export default function DashboardNavbar({
       </div>
     </div>
   );
-} 
+}

@@ -18,7 +18,7 @@ export default function HomePage() {
   const featuredProperties = [
     {
       id: 1,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 1.jpg",
       location: "Miami, FL",
       price: "$1,200,000",
       beds: 4,
@@ -27,7 +27,7 @@ export default function HomePage() {
     },
     {
       id: 2,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 2.jpg",
       location: "Beverly Hills, CA",
       price: "$2,500,000",
       beds: 5,
@@ -36,7 +36,7 @@ export default function HomePage() {
     },
     {
       id: 3,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 3.jpg",
       location: "Austin, TX",
       price: "$850,000",
       beds: 3,
@@ -45,7 +45,7 @@ export default function HomePage() {
     },
     {
       id: 4,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 4.jpg",
       location: "New York, NY",
       price: "$3,200,000",
       beds: 2,
@@ -54,7 +54,7 @@ export default function HomePage() {
     },
     {
       id: 5,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 5.jpg",
       location: "Malibu, CA",
       price: "$5,500,000",
       beds: 4,
@@ -63,7 +63,7 @@ export default function HomePage() {
     },
     {
       id: 6,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 6.jpg",
       location: "Chicago, IL",
       price: "$750,000",
       beds: 3,
@@ -72,7 +72,7 @@ export default function HomePage() {
     },
     {
       id: 7,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 7.jpg",
       location: "Upstate, NY",
       price: "$1,200,000",
       beds: 4,
@@ -81,7 +81,7 @@ export default function HomePage() {
     },
     {
       id: 8,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "/property_images/img 8.jpg",
       location: "Lake Tahoe, CA",
       price: "$2,800,000",
       beds: 5,
@@ -180,7 +180,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="relative h-96 md:h-[500px] bg-gray-200">
         <Image
-          src="/placeholder.svg?height=500&width=1200"
+          src="/property_images/home page.jpg"
           alt="Hero background"
           fill
           className="object-cover"
@@ -308,7 +308,10 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {testimonials.map((testimonial) => (
-              <div key={testimonial.name} className="bg-white p-6 rounded-lg shadow-md">
+              <div
+                key={testimonial.name}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
                 <div className="flex items-center mb-4">
                   <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-semibold text-sm">
@@ -321,7 +324,10 @@ export default function HomePage() {
                     </h4>
                     <div className="flex text-yellow-400">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        <Star
+                          key={i}
+                          className="w-4 h-4 text-yellow-400 fill-yellow-400"
+                        />
                       ))}
                     </div>
                   </div>
@@ -406,7 +412,10 @@ export default function HomePage() {
                   className="bg-blue-600 px-6 py-2 rounded-r-md hover:bg-blue-700"
                   onClick={() => {
                     if (subscriberEmail) {
-                      toast({ title: "You have subscribed to WorkSquare. Stay tuned for new updates." });
+                      toast({
+                        title:
+                          "You have subscribed to WorkSquare. Stay tuned for new updates.",
+                      });
                       setSubscriberEmail("");
                     } else {
                       toast({ title: "Please enter a valid email address." });

@@ -69,8 +69,8 @@ export default function LoginPage() {
       {/* Left Side - Background Image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
         <Image
-          src="/placeholder.svg?height=800&width=600"
-          alt="City skyline"
+          src="/property_images/Login.jpg"
+          alt="Login background"
           fill
           className="object-cover"
         />

@@ -42,16 +42,14 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-200 items-center justify-center p-8">
-        <div className="max-w-md">
-          <Image
-            src="/placeholder.svg?height=400&width=400"
-            alt="Keys and locks"
-            width={400}
-            height={400}
-            className="rounded-lg"
-          />
-        </div>
+      <div className="hidden lg:flex lg:w-1/2 relative">
+        <Image
+          src="/property_images/register.webp"
+          alt="Register background"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-10"></div>
       </div>
 
       {/* Right Side - Form */}

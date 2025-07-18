@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import PropertyCard from "@/components/ui/PropertyCard";
 
 const allProperties = [
   {
     id: 1,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 1.jpg",
     location: "Miami, FL",
     price: "$1,200,000",
     beds: 4,
@@ -13,7 +14,7 @@ const allProperties = [
   },
   {
     id: 2,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 2.jpg",
     location: "Beverly Hills, CA",
     price: "$2,500,000",
     beds: 5,
@@ -22,7 +23,7 @@ const allProperties = [
   },
   {
     id: 3,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 3.jpg",
     location: "Austin, TX",
     price: "$850,000",
     beds: 3,
@@ -31,7 +32,7 @@ const allProperties = [
   },
   {
     id: 4,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 4.jpg",
     location: "New York, NY",
     price: "$3,200,000",
     beds: 2,
@@ -40,7 +41,7 @@ const allProperties = [
   },
   {
     id: 5,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 5.jpg",
     location: "Malibu, CA",
     price: "$5,500,000",
     beds: 4,
@@ -49,7 +50,7 @@ const allProperties = [
   },
   {
     id: 6,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 6.jpg",
     location: "Chicago, IL",
     price: "$750,000",
     beds: 3,
@@ -58,7 +59,7 @@ const allProperties = [
   },
   {
     id: 7,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 7.jpg",
     location: "Upstate, NY",
     price: "$1,200,000",
     beds: 4,
@@ -67,7 +68,7 @@ const allProperties = [
   },
   {
     id: 8,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 8.jpg",
     location: "Lake Tahoe, CA",
     price: "$2,800,000",
     beds: 5,
@@ -117,41 +118,17 @@ export default function ListingsPage() {
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {allProperties.map((property) => (
-            <div
+            <PropertyCard
               key={property.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              <Image
-                src={property.image || "/placeholder.svg"}
-                alt={property.location}
-                width={400}
-                height={300}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-1">
-                  {property.location}
-                </h3>
-                <p className="text-2xl font-bold text-blue-600 mb-2">
-                  {property.price}
-                </p>
-                <div className="flex items-center text-sm text-gray-600 space-x-4">
-                  <span className="flex items-center">
-                    {property.beds} Beds
-                  </span>
-                  <span className="flex items-center">
-                    {property.baths} Baths
-                  </span>
-                  <span>{property.sqft}</span>
-                </div>
-                <Link
-                  href={`/property/${property.id}`}
-                  className="w-full mt-4 bg-gray-100 text-gray-700 py-2 rounded-md hover:bg-gray-200 transition-colors block text-center"
-                >
-                  View Details
-                </Link>
-              </div>
-            </div>
+              id={property.id}
+              images={[property.image]}
+              location={property.location}
+              price={property.price}
+              beds={property.beds}
+              baths={property.baths}
+              sqft={property.sqft}
+              detailsLink={`/property/${property.id}`}
+            />
           ))}
         </div>
       </div>

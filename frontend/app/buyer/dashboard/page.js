@@ -33,7 +33,7 @@ const ProfileSheet = dynamic(() => import("@/components/ui/ProfileSheet"), {
 const featuredProperties = [
   {
     id: 1,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 1.jpg?height=300&width=400",
     location: "Miami, FL",
     price: "$1,200,000",
     beds: 4,
@@ -42,7 +42,7 @@ const featuredProperties = [
   },
   {
     id: 2,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 3.jpg?height=300&width=400",
     location: "Beverly Hills, CA",
     price: "$2,500,000",
     beds: 5,
@@ -51,7 +51,7 @@ const featuredProperties = [
   },
   {
     id: 3,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 3.jpg?height=300&width=400",
     location: "Austin, TX",
     price: "$850,000",
     beds: 3,
@@ -60,7 +60,7 @@ const featuredProperties = [
   },
   {
     id: 4,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 4.jpg?height=300&width=400",
     location: "New York, NY",
     price: "$3,200,000",
     beds: 2,
@@ -69,7 +69,7 @@ const featuredProperties = [
   },
   {
     id: 5,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 5.jpg?height=300&width=400",
     location: "Malibu, CA",
     price: "$5,500,000",
     beds: 4,
@@ -78,7 +78,7 @@ const featuredProperties = [
   },
   {
     id: 6,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 6.jpg?height=300&width=400",
     location: "Chicago, IL",
     price: "$750,000",
     beds: 3,
@@ -87,7 +87,7 @@ const featuredProperties = [
   },
   {
     id: 7,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 7.jpg?height=300&width=400",
     location: "Upstate, NY",
     price: "$1,200,000",
     beds: 4,
@@ -96,7 +96,7 @@ const featuredProperties = [
   },
   {
     id: 8,
-    image: "/placeholder.svg?height=300&width=400",
+    image: "/property_images/img 8.jpg?height=300&width=400",
     location: "Lake Tahoe, CA",
     price: "$2,800,000",
     beds: 5,
@@ -173,10 +173,18 @@ function BuyerDashboardContent() {
   }, []);
 
   const mergedProperties = useMemo(() => {
-    const backend = recommendedProperties.map(p => ({ ...p, _isBackend: true }));
+    const backend = recommendedProperties.map((p) => ({
+      ...p,
+      image:
+        p.main_image ||
+        (Array.isArray(p.images) && p.images.length > 0
+          ? p.images[0].image
+          : undefined),
+      _isBackend: true,
+    }));
     const featured = featuredProperties
-      .filter(fp => !recommendedProperties.some(rp => rp.id === fp.id))
-      .map(p => ({ ...p, _isBackend: false }));
+      .filter((fp) => !recommendedProperties.some((rp) => rp.id === fp.id))
+      .map((p) => ({ ...p, _isBackend: false }));
 
     const merged = [...backend, ...featured];
     merged.sort((a, b) => {
@@ -198,7 +206,9 @@ function BuyerDashboardContent() {
     if (searchType.trim()) {
       setFilteredProperties(
         mergedProperties.filter((p) =>
-          p.property_type?.toLowerCase().includes(searchType.trim().toLowerCase())
+          p.property_type
+            ?.toLowerCase()
+            .includes(searchType.trim().toLowerCase())
         )
       );
     } else {
@@ -206,8 +216,8 @@ function BuyerDashboardContent() {
     }
   }, [searchType, mergedProperties]);
 
-  console.log('filteredProperties:', filteredProperties);
-  console.log('mergedProperties:', mergedProperties);
+  console.log("filteredProperties:", filteredProperties);
+  console.log("mergedProperties:", mergedProperties);
 
   const appointments = [
     {
@@ -250,8 +260,8 @@ function BuyerDashboardContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600">
-                  Here's a quick overview of your property activities and
-                  market insights.
+                  Here's a quick overview of your property activities and market
+                  insights.
                 </p>
               </div>
               {/* Remove the My Profile button */}
@@ -302,9 +312,7 @@ function BuyerDashboardContent() {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm text-gray-600">
-                    Upcoming Appointments
-                  </p>
+                  <p className="text-sm text-gray-600">Upcoming Appointments</p>
                   <p className="text-2xl font-bold text-gray-900">3</p>
                 </div>
               </div>
@@ -383,7 +391,11 @@ function BuyerDashboardContent() {
                     <PropertyCard
                       key={property.id}
                       id={property.id}
-                      image={property.main_image || property.image || "/placeholder.svg"}
+                      image={
+                        property.main_image ||
+                        property.image ||
+                        "/placeholder.svg"
+                      }
                       location={property.address || property.location}
                       price={property.price ? `$${property.price}` : "N/A"}
                       beds={property.beds}
